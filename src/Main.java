@@ -58,7 +58,7 @@ public final class Main {
             out.println("ERROR: normalize() result is not a unit vector");
         Vector u = v.normalized();
         if (u == v)
-            out.println("ERROR: normalizated() function does not create a new vector");
+            out.println("ERROR: normalized() function does not create a new vector");
 
         // Test operations with points and vectors
         Point3D p1 = new Point3D(1, 2, 3); 

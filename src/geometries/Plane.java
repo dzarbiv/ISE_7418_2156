@@ -21,11 +21,13 @@ public class Plane {
         return q0;
     }
 
-    public Vector getNormal() {
+    public Vector getNormal() /***geter*/
+    {
         return normal;
     }
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)/**The operation compares the object on which it is applied to the object received as a parameter*/
+    {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof Plane)) return false;
@@ -34,7 +36,8 @@ public class Plane {
     }
 
     @Override
-    public String toString() {
+    public String toString()/**The operation returns a string with the values of all the field fields*/
+    {
         return "Plane{" +
                 "q0=" + q0.toString() +
                 ", normal=" + normal.toString() +

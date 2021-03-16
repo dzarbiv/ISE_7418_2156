@@ -1,5 +1,5 @@
 package primitives;
-//Foundry object in geometry - large point 3 coordinates
+/***Foundry object in geometry - large point 3 coordinates*/
 public class Point3D
 {
     public static final Point3D ZERO = new Point3D(0, 0, 0);
@@ -7,14 +7,14 @@ public class Point3D
     Coordinate y;
     Coordinate z;
 
-    public Point3D(Coordinate c1, Coordinate c2, Coordinate c3)//constructor
+    public Point3D(Coordinate c1, Coordinate c2, Coordinate c3)/**constructor*/
     {
         this.x = c1;
         this.y = c2;
         this.z = c3;
     }
 
-    public Point3D(double x, double y, double z) //constructor
+    public Point3D(double x, double y, double z) /***constructor*/
     {
         this.x = new Coordinate(x);
         this.y = new Coordinate(y);
@@ -22,7 +22,7 @@ public class Point3D
     }
 
     @Override
-    public boolean equals(Object obj)//The operation compares the object on which it is applied to the object received as a parameter
+    public boolean equals(Object obj)/**The operation compares the object on which it is applied to the object received as a parameter*/
      {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -32,7 +32,7 @@ public class Point3D
     }
 
     @Override
-    public String toString()//The operation returns a string with the values of all the field fields
+    public String toString()/**The operation returns a string with the values of all the field fields*/
     {
         return "Point3D{" +
                 "c1=" + x.toString() +
@@ -41,16 +41,16 @@ public class Point3D
                 '}';
     }
 
-    public Vector subtract(Point3D other)//Vector subtraction
+    public Vector subtract(Point3D other)/**Vector subtraction*/
     {
         return new Vector(this.x.coord - other.x.coord, this.y.coord - other.y.coord, this.z.coord - other.z.coord);
     }
 
-    public Point3D add(Vector other)//Add a vector to a dot
+    public Point3D add(Vector other)/**Add a vector to a dot*/
     {
         return (new Point3D(this.x.coord+other.head.x.coord,this.y.coord+other.head.y.coord,this.z.coord+other.head.z.coord));
     }
-    public double distanceSquared(Point3D other)
+    public double distanceSquared(Point3D other)/**The distance between two points squared*/
     {
         double x, y, z;
         x=(this.x.coord-other.x.coord)*(this.x.coord-other.x.coord);
@@ -58,7 +58,7 @@ public class Point3D
         z=(this.z.coord-other.z.coord)*(this.z.coord-other.z.coord);
         return x+y+z;
     }
-    public double distance(Point3D other)
+    public double distance(Point3D other)/***The distance between two points*/
     {
         return Math.sqrt(this.distanceSquared(other));
     }
