@@ -1,5 +1,5 @@
 package primitives;
-//A foundational object in geometry with direction and size, defined by the end point
+/***A foundational object in geometry with direction and size, defined by the end point*/
 public class Vector {
     protected Point3D head;
 
@@ -13,15 +13,12 @@ public class Vector {
 
     public Vector(double x, double y, double z) /***constructor*/
     {
-        this.head.x = new Coordinate(x);
-        this.head.y = new Coordinate(y);
-        this.head.z = new Coordinate(z);
-        if (head.equals(Point3D.ZERO))
+        if(x==0&&y==0&&z==0)
             throw new IllegalArgumentException("Vector 0 was inserted");
-
+        head=new Point3D(x, y, z);
     }
 
-    public Vector(Coordinate x, Coordinate y, Coordinate z)//constructor
+    public Vector(Coordinate x, Coordinate y, Coordinate z)/**constructor*/
     {
         this.head.x = x;
         this.head.y = y;
@@ -31,7 +28,7 @@ public class Vector {
 
     }
 
-    public Point3D getHead()//getter
+    public Point3D getHead()/**getter*/
     {
         return head;
     }
