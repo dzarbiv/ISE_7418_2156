@@ -1,5 +1,5 @@
 package primitives;
-/***Foundry object in geometry - large point 3 coordinates*/
+/**Foundry object in geometry - large point 3 coordinates*/
 public class Point3D
 {
     public static final Point3D ZERO = new Point3D(0, 0, 0);
