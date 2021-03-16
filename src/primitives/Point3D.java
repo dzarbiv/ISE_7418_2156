@@ -58,7 +58,7 @@ public class Point3D
         z=(this.z.coord-other.z.coord)*(this.z.coord-other.z.coord);
         return x+y+z;
     }
-    public double distance(Point3D other)/***The distance between two points*/
+    public double distance(Point3D other)/**The distance between two points*/
     {
         return Math.sqrt(this.distanceSquared(other));
     }
