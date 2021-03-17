@@ -13,16 +13,14 @@ public class Vector {
 
     public Vector(double x, double y, double z) /***constructor*/
     {
-        if(x==0&&y==0&&z==0)
-            throw new IllegalArgumentException("Vector 0 was inserted");
         head=new Point3D(x, y, z);
+        if(head.equals(Point3D.ZERO))
+            throw new IllegalArgumentException("Vector 0 was inserted");
     }
 
     public Vector(Coordinate x, Coordinate y, Coordinate z)/**constructor*/
     {
-        this.head.x = x;
-        this.head.y = y;
-        this.head.z = z;
+        head=new Point3D(x, y, z);
         if (head.equals(Point3D.ZERO))
             throw new IllegalArgumentException("Vector 0 was inserted");
 
@@ -34,7 +32,7 @@ public class Vector {
     }
 
     @Override
-    public boolean equals(Object obj)/***The operation compares the object on which it is applied to the object received as a parameter*/
+    public boolean equals(Object obj)/**The operation compares the object on which it is applied to the object received as a parameter*/
     {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -99,7 +97,7 @@ public class Vector {
     }
     public Vector normalized()/**A normalization operation that returns a new normalized vector in the same direction as the original vector*/
     {
-        /***Vector v=this;
+        /**Vector v=this;
         return v.normalize();*/
         Vector v=new Vector(this.normalize().head);
         return v;

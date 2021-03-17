@@ -14,7 +14,7 @@ public class Point3D
         this.z = c3;
     }
 
-    public Point3D(double x, double y, double z) /***constructor*/
+    public Point3D(double x, double y, double z) /**constructor*/
     {
         this.x = new Coordinate(x);
         this.y = new Coordinate(y);

@@ -4,8 +4,7 @@ import primitives.Point3D;
 import primitives.Vector;
 
 public class Cylinder implements Geometry{
-    public Cylinder() {
-    }
+    public Cylinder() { }/**constructor*/
 
     @Override
     public String toString() {

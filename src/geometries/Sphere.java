@@ -4,8 +4,7 @@ import primitives.Point3D;
 import primitives.Vector;
 
 public class Sphere implements Geometry {
-    public Sphere() {
-    }
+    public Sphere() {}/**constructor*/
 
     @Override
     public String toString() {

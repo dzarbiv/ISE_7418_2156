@@ -4,8 +4,7 @@ import primitives.Point3D;
 import primitives.Vector;
 
 public class Tube implements Geometry{
-    public Tube() {
-    }
+    public Tube() { }/**constructor*/
 
     @Override
     public String toString() {
