@@ -4,7 +4,6 @@ import static primitives.Util.*;
 
 /**
  * Test program for the 1st stage
- *
  * @author DEVORA ZARBIV 315437418
  * RACHEL LEA KOHEN 211372156
  */
