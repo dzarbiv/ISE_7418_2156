@@ -9,14 +9,19 @@ import static org.junit.jupiter.api.Assertions.*;
 import static primitives.Util.isZero;
 class PlaneTest {
 
+    /**
+     * Test method for {@link geometries.Plane#Plane(Point3D, Point3D,Point3D)}
+     */
     @Test
     void testConstructor(){
+        // ============ Equivalence Partitions Tests ==============
         Point3D p1=new Point3D(0,1,1);
         Point3D p2=new Point3D(-2,1,0);
         Point3D p3=new Point3D(5,0,2);
         Plane p=new Plane(p1, p2, p3);
         Vector v=p.getNormal();
         assertEquals(new Vector(-1/Math.sqrt(14),-3/Math.sqrt(14),2/Math.sqrt(14)),v,"Error: constructor does not work correctly");
+        // =============== Boundary Values Tests ==================
         /**test for p1=p2*/
         Plane pl=new Plane(p1, p2, p3);
         /**test for p1 p2 p3 on the same line*/
@@ -27,8 +32,13 @@ class PlaneTest {
         }
         catch (IllegalArgumentException e){}
     }
+
+    /**
+     * Test method for {@link geometries.Plane#getNormal()}
+     */
     @Test
     void getNormal() {
+        // ============ Equivalence Partitions Tests ==============
         Point3D p1=new Point3D(1,2,3);
         Point3D p2=new Point3D(1,0,1);
         Point3D p3=new Point3D(3,1,2);
@@ -41,6 +51,7 @@ class PlaneTest {
         /**check that  normal to plane is a unit vector*/
         assertEquals(1, normal.length(), 0.01,"Error: normal to plane not normalized");
 
+        // =============== Boundary Values Tests ==================
         /**check that normal is orthogonal to plane*/
         Vector v1=new Vector((p1.subtract(p2).getHead()));
         Vector v2=new Vector((p2.subtract(p3).getHead()));

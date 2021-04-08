@@ -11,7 +11,7 @@ public class Tube implements Geometry{
     final double radius;
     final Ray axis;
 
-    public Tube(double radius, Ray axis) {
+    public Tube(double radius, Ray axis)/**constructor*/ {
         if(radius==ZERO)
             throw new IllegalArgumentException("Error: the radius is zero");
         this.radius = radius;
@@ -37,9 +37,7 @@ public class Tube implements Geometry{
            n = (p.subtract(o));
         }
         else
-        {
             n=p.subtract(axis.getP0()).normalize();
-        }
         return n.normalize();
 
     }

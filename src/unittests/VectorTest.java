@@ -21,6 +21,7 @@ public class VectorTest {
     @Test
     void add() {
         // ============ Equivalence Partitions Tests ==============
+        /***/
         Point3D p1 = new Point3D(1, 2, 3);
         assertFalse (!Point3D.ZERO.equals(p1.add(new Vector(-1, -2, -3))),"ERROR: Point + Vector does not work correctly");
     }

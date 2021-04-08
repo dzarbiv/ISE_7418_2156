@@ -2,8 +2,9 @@ package geometries;
 
 import primitives.Point3D;
 
-public class Triangle extends Polygon implements Geometry{
-    public Triangle(Point3D... vertices) {
+public class Triangle extends Polygon implements Geometry
+{
+    public Triangle(Point3D... vertices) /**constructor*/{
         super(vertices);
     }
 
@@ -14,5 +15,4 @@ public class Triangle extends Polygon implements Geometry{
                 ", plane=" + plane.toString() +
                 '}';
     }
-
 }

@@ -9,11 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SphereTest {
 
+    /**
+     * Test method for {@link geometries.Sphere#getNormal(primitives.Point3D)}.
+     */
     @Test
     public void getNormal() {
-        Sphere s=new Sphere(3,new Point3D(1,2,3));
-        Vector v=s.getNormal(new Point3D(1,2,3));
-        assertEquals(new Vector(0,-1,0),v,"Error: normal to plane not normalized");
+        // ============ Equivalence Partitions Tests ==============
+        /**Test whether the point on the Sphere*/
+        Sphere s=new Sphere(1,new Point3D(0,0,0));
+        Vector v=s.getNormal(new Point3D(1,0,0));
+        assertEquals(new Vector(1,0,0),v,"Error: normal to plane not normalized");
 
     }
 }
