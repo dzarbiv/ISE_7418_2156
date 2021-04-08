@@ -9,6 +9,10 @@ public class Point3D
 
     public Point3D(Coordinate c1, Coordinate c2, Coordinate c3)/**constructor*/
     {
+        if (c1.equals(ZERO)&&c2.equals(ZERO)&&c3.equals(ZERO))
+        {
+            throw new IllegalArgumentException("Vector 1 was inserted");
+        }
         this.x = c1;
         this.y = c2;
         this.z = c3;
@@ -50,6 +54,7 @@ public class Point3D
     {
         return (new Point3D(this.x.coord+other.head.x.coord,this.y.coord+other.head.y.coord,this.z.coord+other.head.z.coord));
     }
+
     public double distanceSquared(Point3D other)/**The distance between two points squared*/
     {
         double x, y, z;

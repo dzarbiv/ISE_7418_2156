@@ -9,7 +9,7 @@ public class Ray {
    {
       this.p0 = p0;
       double normal=sqrt((((dir.head.x.coord)*(dir.head.x.coord))+(dir.head.y.coord)*(dir.head.y.coord))+(dir.head.z.coord)*(dir.head.z.coord));
-      this.dir = dir;
+      this.dir = dir.normalize();
    }
 
    public Point3D getP0()/**getter*/

@@ -14,4 +14,5 @@ public class Triangle extends Polygon implements Geometry{
                 ", plane=" + plane.toString() +
                 '}';
     }
+
 }

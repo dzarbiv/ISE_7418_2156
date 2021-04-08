@@ -1,7 +1,6 @@
 package geometries;
 
 import primitives.Point3D;
-import primitives.Ray;
 import primitives.Vector;
 
 public class Plane {
@@ -13,10 +12,16 @@ public class Plane {
         this.q0 = q0;
         this.normal = normal;
     }
-    public Plane(Point3D q0, Point3D q1, Point3D q2)/**constructor*/
+    public Plane(Point3D p0, Point3D p1, Point3D p2)/**constructor*/
     {
-        this.q0=q2;
-        this.normal=null;
+        q0=p0;
+        Vector u=p1.subtract(p0);
+        Vector v=p2.subtract(p1);
+        Vector n=u.crossProduct(v);
+        n.normalize();
+        normal=n;
+       // this.q0=q2;
+        //this.normal=q2.subtract(q0).crossProduct(q1.subtract(q0));
     }
 
     public Point3D getQ0()/**getter*/
@@ -46,4 +51,5 @@ public class Plane {
                 ", normal=" + normal.toString() +
                 '}';
     }
+
 }

@@ -1,11 +1,14 @@
 package primitives;
+
+import static primitives.Point3D.ZERO;
+
 /***A foundational object in geometry with direction and size, defined by the end point*/
 public class Vector {
     protected Point3D head;
 
-    public Vector(Point3D head) /**constructor*/
+    public Vector( Point3D head) /**constructor*/
     {
-        if (head.equals(Point3D.ZERO))
+        if (head.equals(ZERO))
             throw new IllegalArgumentException("Vector 0 was inserted");
         this.head = head;
 
@@ -13,17 +16,12 @@ public class Vector {
 
     public Vector(double x, double y, double z) /***constructor*/
     {
-        head=new Point3D(x, y, z);
-        if(head.equals(Point3D.ZERO))
-            throw new IllegalArgumentException("Vector 0 was inserted");
+       this(new Point3D(x,y,z));
     }
 
     public Vector(Coordinate x, Coordinate y, Coordinate z)/**constructor*/
     {
-        head=new Point3D(x, y, z);
-        if (head.equals(Point3D.ZERO))
-            throw new IllegalArgumentException("Vector 0 was inserted");
-
+        this(new Point3D(x,y,z));
     }
 
     public Point3D getHead()/**getter*/
@@ -64,7 +62,7 @@ public class Vector {
         return (new Vector(this.head.x.coord * num, this.head.y.coord * num, this.head.z.coord * num));
     }
 
-    public double dotProduct(Vector other)/**Scalar product*/
+    public double dotProduct( Vector other)/**Scalar product*/
     {
         return ((this.head.x.coord * other.head.x.coord) + (this.head.y.coord * other.head.y.coord) + (this.head.z.coord * other.head.z.coord));
     }
