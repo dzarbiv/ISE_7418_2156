@@ -1,6 +1,7 @@
 package unittests;
 
 import geometries.Cylinder;
+import org.junit.jupiter.api.Test;
 import primitives.Point3D;
 import primitives.Ray;
 import primitives.Vector;
@@ -41,5 +42,9 @@ class CylinderTest {
         Vector v4= c2.getNormal(new Point3D(0, 1, 0));
         assertEquals(c2.getNormal(new Point3D(0, 1, 0)), v4, "Error: not expected normal,for center of bottom base");
 
+    }
+
+    @Test
+    void findIntersections() {
     }
 }

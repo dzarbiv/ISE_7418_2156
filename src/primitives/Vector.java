@@ -1,15 +1,14 @@
 package primitives;
 
-import static primitives.Point3D.ZERO;
-
 /***A foundational object in geometry with direction and size, defined by the end point*/
 public class Vector {
+    private static final Point3D ZERO = null;
     protected Point3D head;
 
     public Vector( Point3D head) /**constructor*/
     {
         if (head.equals(ZERO))
-            throw new IllegalArgumentException("Vector 0 was inserted");
+           throw new IllegalArgumentException("Vector 0 was inserted");
         this.head = head;
 
     }
@@ -73,6 +72,9 @@ public class Vector {
         x = (((this.head.y.coord) * (other.head.z.coord)) - ((this.head.z.coord) * (other.head.y.coord)));
         y = (((this.head.z.coord) * (other.head.x.coord)) - ((this.head.x.coord) * (other.head.z.coord)));
         z = (((this.head.x.coord) * (other.head.y.coord)) - ((this.head.y.coord) * (other.head.x.coord)));
+        Point3D p=new Point3D(x,y,z);
+        if(p.equals(Point3D.ZERO))
+            throw new IllegalArgumentException("Vector 0 was inserted");
         return (new Vector(x, y, z));
     }
 

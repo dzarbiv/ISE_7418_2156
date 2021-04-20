@@ -1,5 +1,6 @@
 package primitives;
 import static java.lang.Math.sqrt;
+import static primitives.Util.isZero;
 
 public class Ray {
    protected Point3D p0;
@@ -39,4 +40,12 @@ public class Ray {
               ", dir=" + dir.toString() +
               '}';
    }
+   public Point3D getPoint(double t)
+   {
+      if(isZero(t))
+         return p0;
+      else
+         return p0.add(dir.scale(t));
+   }
+
 }

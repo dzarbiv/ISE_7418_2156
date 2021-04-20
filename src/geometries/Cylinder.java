@@ -4,6 +4,8 @@ import primitives.Point3D;
 import primitives.Ray;
 import primitives.Vector;
 
+import java.util.List;
+
 public class Cylinder extends Tube implements Geometry{
     private static final double ZERO = 0;
     protected double height;
@@ -43,5 +45,10 @@ public class Cylinder extends Tube implements Geometry{
             throw new IllegalArgumentException("Error: the point does not on the cylinder");
         }
         return n.normalize();
+    }
+
+    @Override
+    public List<Point3D> findIntersections(Ray ray) {
+        return null;
     }
 }
