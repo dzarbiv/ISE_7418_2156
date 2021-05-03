@@ -1,4 +1,6 @@
 package primitives;
+import java.util.List;
+
 import static java.lang.Math.sqrt;
 import static primitives.Util.isZero;
 
@@ -46,6 +48,27 @@ public class Ray {
          return p0;
       else
          return p0.add(dir.scale(t));
+   }
+
+   /**
+    *
+    * @param lp Collection of points
+    * @return The point closest to the beginning of the foundation
+    */
+   public Point3D findClosestPoint(List<Point3D> lp)
+   {
+      double distance=Double.POSITIVE_INFINITY;
+      Point3D nearPoint=null;
+      if(lp!=null) {
+         for (Point3D point : lp) {
+            double dis = point.distance(p0);
+            if (dis < distance) {
+               distance = dis;
+               nearPoint = point;
+            }
+         }
+      }
+      return nearPoint;
    }
 
 }
