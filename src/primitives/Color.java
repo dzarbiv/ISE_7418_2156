@@ -13,17 +13,16 @@ public class Color {
      * The internal fields tx`o maintain RGB components as double numbers from 0 to
      * whatever...
      */
-    private double r = 0.0;
-    private double g = 0.0;
-    private double b = 0.0;
+    private final double r ;
+    private final double g ;
+    private final double b;
 
     public static final Color BLACK = new Color();
 
     /**
      * Default constructor - to generate Black Color (privately)
      */
-    private Color() {
-    }
+    private Color() {r=g=b=0.0;}
 
     /**
      * Constructor to generate a color according to RGB components Each component in
@@ -64,62 +63,6 @@ public class Color {
     }
 
     /**
-     * Color setter to reset the color to BLACK
-     *
-     * @return the Color object itself for chaining calls
-     */
-    public Color setColor() {
-        r = 0.0;
-        g = 0.0;
-        b = 0.0;
-        return this;
-    }
-
-    /**
-     * Color setter to generate a color according to RGB components Each component
-     * in range 0..255 (for printed white color) or more [for lights]
-     *
-     * @param r Red component
-     * @param g Green component
-     * @param b Blue component
-     * @return the Color object itself for chaining calls
-     */
-    public Color setColor(double r, double g, double b) {
-        if (r < 0 || g < 0 || b < 0)
-            throw new IllegalArgumentException("Negative color component is illegal");
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        return this;
-    }
-
-    /**
-     * Color setter to copy RGB components from another color
-     *
-     * @param other source Color object
-     * @return the Color object itself for chaining calls
-     */
-    public Color setColor(Color other) {
-        r = other.r;
-        g = other.g;
-        b = other.b;
-        return this;
-    }
-
-    /**
-     * Color setter to take components from an base of java.awt.Color object
-     *
-     * @param other java.awt.Color's source object
-     * @return the Color object itself for chaining calls
-     */
-    public Color setColor(java.awt.Color other) {
-        r = other.getRed();
-        g = other.getGreen();
-        b = other.getBlue();
-        return this;
-    }
-
-    /**
      * Color getter - returns the color after converting it into java.awt.Color
      * object During the conversion any component bigger than 255 is set to 255
      *
@@ -129,7 +72,7 @@ public class Color {
         int ir = (int) r;
         int ig = (int) g;
         int ib = (int) b;
-        return new java.awt.Color(ir > 255 ? 255 : ir, ig > 255 ? 255 : ig, ib > 255 ? 255 : ib);
+        return new java.awt.Color(Math.min(ir, 255), Math.min(ig, 255), Math.min(ib, 255));
     }
 
     /**

@@ -1,4 +1,4 @@
-package unittests;
+package unittests.primitives;
 
 import org.junit.jupiter.api.Test;
 import primitives.Point3D;

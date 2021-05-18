@@ -1,6 +1,5 @@
 package geometries;
 
-import primitives.Point3D;
 import primitives.Ray;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ private List<Intersectable> intersectable=new LinkedList<>();
         Collections.addAll(intersectable,geometries);
     }
 
-    @Override
+    /**@Override
         public List<Point3D> findIntersections (Ray ray) {
         List<Point3D> result = null;
         for (Intersectable item : intersectable) {
@@ -37,6 +36,28 @@ private List<Intersectable> intersectable=new LinkedList<>();
                     result = new LinkedList<>();
                 result.addAll(itemIntersectionPoint);
             }
+        }
+        return result;
+    }*/
+
+    /**
+     *
+     * @param ray
+     * @return
+     */
+    @Override
+    public List<GeoPoint> findGeoIntersections(Ray ray) {
+        List<GeoPoint> result = null;
+        for (Intersectable item : intersectable) {
+            List<GeoPoint> itemIntersectionPoint = item.findGeoIntersections(ray);
+            if (itemIntersectionPoint == null) {
+                 continue;
+            }
+            if (result == null){
+                result = new LinkedList<>(itemIntersectionPoint);
+               continue;
+            }
+            result.addAll(itemIntersectionPoint);
         }
         return result;
     }

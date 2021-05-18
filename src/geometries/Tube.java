@@ -8,21 +8,21 @@ import java.util.List;
 
 import static primitives.Util.isZero;
 
-public class Tube extends RadialGeometry implements Geometry{
+public class Tube  extends Geometry{
     private static final double ZERO = 0;
     final Ray axis;
-
+    final double _radius;
     public Tube(double radius, Ray axis)/**constructor*/ {
-        super(radius);
         if(radius==ZERO)
             throw new IllegalArgumentException("Error: the radius is zero");
+        _radius=radius;
         this.axis = axis;
     }
 
     @Override
     public String toString() {
         return "Tube{" +
-                "radius=" + radius +
+                "radius=" + _radius +
                 ", axis=" + axis.toString() +
                 '}';
     }
@@ -44,7 +44,8 @@ public class Tube extends RadialGeometry implements Geometry{
     }
 
     @Override
-    public List<Point3D> findIntersections(Ray ray) {
+    public List<GeoPoint> findGeoIntersections(Ray ray)
+    {
         return null;
     }
 }

@@ -1,10 +1,8 @@
-package unittests;
+package unittests.renderer;
 
 import org.junit.jupiter.api.Test;
 import primitives.Color;
 import renderer.ImageWriter;
-
-import static org.junit.jupiter.api.Assertions.*;
 class ImageWriterTest {
 
     @Test
@@ -20,7 +18,7 @@ class ImageWriterTest {
                 if (i % gapY == 0 || j % gapX == 0) {
                     imageWriter.writePixel(j, i, Color.BLACK);
                 } else {//writing blue pixel
-                    imageWriter.writePixel(j, i, new Color(0, 1000, 0));
+                    imageWriter.writePixel(j, i, new Color(0, 50, 0));
                 }
             }
         }

@@ -9,7 +9,7 @@ import java.util.List;
 
 import static primitives.Util.isZero;
 
-public class  Plane implements Geometry{
+public class  Plane extends Geometry{
     protected Point3D q0;
     protected Vector normal;
 
@@ -60,7 +60,7 @@ public class  Plane implements Geometry{
 
 
     @Override
-    public List<Point3D> findIntersections(Ray ray) {
+    public List<GeoPoint> findGeoIntersections(Ray ray) {
         Vector p0q;
         try {
             p0q = q0.subtract(ray.getP0());
@@ -70,11 +70,13 @@ public class  Plane implements Geometry{
         double nv = normal.dotProduct(ray.getDir());
         if (isZero(nv))/** ray is parallel to the plane - no intersections*/
             return null;
-        double t = Util.alignZero(normal.dotProduct(p0q)/ nv);
-        if(t<=0)
+        double t = Util.alignZero(normal.dotProduct(p0q) / nv);
+        if (t <= 0)
             return null;
-        else
-            return List.of(ray.getPoint(t));
+        else {
+            Point3D p = ray.getPoint(t);
+            return List.of(new GeoPoint(this,p));
         }
     }
+}
 

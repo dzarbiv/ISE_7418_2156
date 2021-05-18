@@ -8,7 +8,7 @@ import java.util.List;
 
 import static primitives.Util.isZero;
 
-public class Triangle extends Polygon implements Geometry
+public class Triangle extends Polygon
 {
     public Triangle(Point3D... vertices) /**constructor*/{
         super(vertices);

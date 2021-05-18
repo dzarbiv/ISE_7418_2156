@@ -1,4 +1,4 @@
-package unittests;
+package unittests.geometries;
 
 import geometries.*;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class GeometriesTest {
         /**empty geometries collections*/
         assertNull(geometries.findIntersections(new Ray(new Point3D(0,1,0), new Vector(1,0,5))),"empty geometries collections");
 
-        geometries.add(new Sphere(1d, new Point3D(1, 0, 0)));
+        geometries.add((Intersectable) new Sphere(1d, new Point3D(1, 0, 0)));
         geometries.add(new Plane(new Point3D(0,1,0), new Vector(0,0,1)));
         geometries.add(new Triangle(new Point3D(1,0,0), new Point3D(0,1,0), new Point3D(0,0,1)));
         //geometries.add((Intersectable) new Sphere(1d, new Point3D(1, 0, 0)));

@@ -1,4 +1,4 @@
-package unittests;
+package unittests.geometries;
 
 import geometries.Polygon;
 import org.junit.jupiter.api.Test;
