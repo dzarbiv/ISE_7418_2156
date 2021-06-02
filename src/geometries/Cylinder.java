@@ -27,18 +27,18 @@ public class Cylinder extends Tube {
     public Vector getNormal(Point3D p) {
         Vector n ;
         /**If the point is on one of the bases of the final cylinder*/
-        if(p.equals(axis.getP0())||p.equals(axis.getP0().add(axis.getDir().scale(height))))
+        if(p.equals(_axis.getP0())||p.equals(_axis.getP0().add(_axis.getDir().scale(height))))
         {
             /**If the point is in the middle of the circle of the beginning of the final cylinder*/
-           if(p==axis.getP0())
-               n=axis.getDir().scale(-1);/**Return -v*/
+           if(p== _axis.getP0())
+               n= _axis.getDir().scale(-1);/**Return -v*/
            else/**If the point is in the middle of the circle of the end of the final cylinder*/
-               n=axis.getDir();/**return v*/
+               n= _axis.getDir();/**return v*/
         }
         else {
-            double t = (axis.getDir()).dotProduct(p.subtract(axis.getP0()));
+            double t = (_axis.getDir()).dotProduct(p.subtract(_axis.getP0()));
             if (t <= height) {
-                Point3D o = axis.getP0().add(axis.getDir().scale(t));
+                Point3D o = _axis.getP0().add(_axis.getDir().scale(t));
                 n = (p.subtract(o)).normalize();
             }
         else/**The point is not on the cylinder*/

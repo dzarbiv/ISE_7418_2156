@@ -5,7 +5,7 @@ import primitives.Color;
  * abstract class
  */
 public abstract class Light {
-     protected final Color intensity;
+    protected final Color intensity;
 
     /**
      * constructor

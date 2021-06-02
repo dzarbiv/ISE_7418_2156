@@ -8,26 +8,16 @@ import primitives.Color;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class Scene {
     private final String name;
 
     public Color background=Color.BLACK;
     public AmbientLight ambientLight=new AmbientLight(Color.BLACK,0);
     public Geometries geometries=null;
-    /**
-     * List of lighting sources
-     */
-    public List<LightSource> lights=new LinkedList<LightSource>();
-
-    /**
-     *setter
-     * @param lights
-     * @return scene
-     */
-    public Scene setLights(List<LightSource> lights) {
-        this.lights = lights;
-        return this;
-    }
+    public List<LightSource> lights =new LinkedList<>();
 
     public Scene(String name) {
         this.name = name;

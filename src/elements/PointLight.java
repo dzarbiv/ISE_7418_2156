@@ -49,7 +49,7 @@ public class PointLight extends Light implements LightSource{
     }
 
     public PointLight setKc(double kc) {
-       _Kc = kc;
-       return this;
+        _Kc = kc;
+        return this;
     }
 }

@@ -40,26 +40,26 @@ private List<Intersectable> intersectable=new LinkedList<>();
         return result;
     }*/
 
-    /**
-     *
-     * @param ray
-     * @return
-     */
-    @Override
-    public List<GeoPoint> findGeoIntersections(Ray ray) {
+/**
+ *
+ * @param ray
+ * @return
+ */
+@Override
+public List<GeoPoint> findGeoIntersections(Ray ray) {
         List<GeoPoint> result = null;
         for (Intersectable item : intersectable) {
-            List<GeoPoint> itemIntersectionPoint = item.findGeoIntersections(ray);
-            if (itemIntersectionPoint == null) {
-                 continue;
-            }
-            if (result == null){
-                result = new LinkedList<>(itemIntersectionPoint);
-               continue;
-            }
-            result.addAll(itemIntersectionPoint);
+        List<GeoPoint> itemIntersectionPoint = item.findGeoIntersections(ray);
+        if (itemIntersectionPoint == null) {
+        continue;
+        }
+        if (result == null){
+        result = new LinkedList<>(itemIntersectionPoint);
+        continue;
+        }
+        result.addAll(itemIntersectionPoint);
         }
         return result;
-    }
+        }
 
 }

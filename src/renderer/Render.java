@@ -34,7 +34,7 @@ public class Render {
         try {
             if (_imageWriter == null)
                 throw new MissingResourceException("missing resource", ImageWriter.class.getName(), "");
-             if (_camera == null)
+            if (_camera == null)
                 throw new MissingResourceException("missing resource", Camera.class.getName(), "");
             if (_rayTracer == null)
                 throw new MissingResourceException("missing resource", RayTracerBase.class.getName(), "");

@@ -37,7 +37,7 @@ class RayTest {
 
         //TC02: The last point is closest to the beginning of the foundation
         List<Point3D> lp2= List.of(new Point3D(2, 0, 0),new Point3D(3, 0, 0),  new Point3D(4, 0, 0), new Point3D(5, 0, 0),new Point3D(1, 0, 0));
-        assertEquals(point3D,ray.findClosestPoint(lp2), "not fund the point in end of th list");
+        assertEquals(point3D,ray.findClosestPoint(lp2), "not fund the point in end of the list");
 
 
 

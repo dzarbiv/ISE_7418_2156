@@ -4,6 +4,12 @@ import primitives.Color;
 import primitives.Point3D;
 import primitives.Vector;
 
+/**
+ *
+ * class DirectionalLight extends Light implements LightSource - Light source is far away
+ * has intensity and direction ,No attenuation with distance
+ * @author devora, rachel lea
+ */
 public class DirectionalLight extends Light implements LightSource{
     final private Vector _direction;
 

@@ -88,4 +88,3 @@ public class RenderTests {
         render.writeToImage();
     }
 }
-

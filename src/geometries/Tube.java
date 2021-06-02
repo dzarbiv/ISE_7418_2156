@@ -10,13 +10,14 @@ import static primitives.Util.isZero;
 
 public class Tube  extends Geometry{
     private static final double ZERO = 0;
-    final Ray axis;
+    final Ray _axis;
     final double _radius;
     public Tube(double radius, Ray axis)/**constructor*/ {
         if(radius==ZERO)
             throw new IllegalArgumentException("Error: the radius is zero");
         _radius=radius;
-        this.axis = axis;
+        this._axis = axis;
+
     }
 
     @Override
@@ -30,19 +31,24 @@ public class Tube  extends Geometry{
     @Override
     public Vector getNormal(Point3D p)
     {
-    /**O is projection of P on cylinder's ray*/
-     double t=(axis.getDir()).dotProduct(p.subtract(axis.getP0()));
+     double t=(_axis.getDir()).dotProduct(p.subtract(_axis.getP0()));
         Vector n ;
         if (!isZero(t)) {
-            Point3D o=axis.getP0().add(axis.getDir().scale(t));
+            Point3D o=_axis.getP0().add(_axis.getDir().scale(t));
            n = (p.subtract(o));
         }
         else
-            n=p.subtract(axis.getP0()).normalize();
+            n=p.subtract(_axis.getP0()).normalize();
         return n.normalize();
 
     }
 
+
+    @Override
+    public List<GeoPoint> findGeoIntersections(Ray ray)
+    {
+        return null;
+    }
     @Override
     public List<GeoPoint> findGeoIntersections(Ray ray)
     {
