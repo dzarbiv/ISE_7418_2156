@@ -2,23 +2,28 @@ package elements;
 
 import primitives.Color;
 
+/**
+ * Represent the ambient light and his impact on specific pixel/ point
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
 public class AmbientLight extends Light {
 
     /**
-     *constructor
-     * @param Ia intensity color
-     * @param Ka constructor fot intensity
+     * c-tor. send to the parent c-tor (Light) to black color fot the intensity.
      */
-    public AmbientLight(Color Ia, double Ka) {
-
-        super(Ia.scale(Ka)) ;
+    public AmbientLight() {
+        super(Color.BLACK);
     }
 
     /**
-     * default constructor
+     * c-tor. calculate and return the intensity
+     *
+     * @param iA the light intensity on specific pixel/ point (Color)
+     * @param kA the light intensity of the ambient light (double)
      */
-    public AmbientLight() {
-        super(Color.BLACK) ;
+    public AmbientLight(Color iA, double kA) {
+        super(iA.scale(kA));
     }
 
 }

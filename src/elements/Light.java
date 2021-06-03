@@ -2,25 +2,26 @@ package elements;
 import primitives.Color;
 
 /**
- * abstract class
+ * An abstract class, represent the light
  */
-public abstract class Light {
-    protected final Color intensity;
+abstract class Light {
+    protected Color _intensity; // The intensity of the color of the light
 
     /**
-     * constructor
-     * @param intensity
+     * c-tor initialize the intensity filed
+     *
+     * @param intensity (Color)
      */
-    public Light(Color intensity) {
-        this.intensity = intensity;
+    protected Light(Color intensity) {
+        _intensity = intensity;
     }
 
     /**
-     * get intensity
-     * @return intensity
+     * Return the intensity of the light source
+     *
+     * @return The intensity of the light source (Color)
      */
     public Color getIntensity() {
-        return intensity;
+        return _intensity;
     }
-
 }

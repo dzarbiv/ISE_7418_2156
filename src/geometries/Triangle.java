@@ -6,42 +6,68 @@ import primitives.Vector;
 
 import java.util.List;
 
-import static primitives.Util.isZero;
+import static primitives.Util.alignZero;
 
-public class Triangle extends Polygon
-{
-    public Triangle(Point3D... vertices) /**constructor*/{
+/**
+ * Triangle class representing a two-dimensional Triangle in 3D Cartesian coordinate
+ * system
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
+public class Triangle extends Polygon {
+
+    /**
+     * c-tor initiate the vertices with the receiving list of vertices.
+     *
+     * @param vertices Point3D[]
+     */
+    public Triangle(Point3D... vertices) {
         super(vertices);
+    }
+
+    /**
+     * Find the intersection point of the ray and the triangle
+     *
+     * @param ray The light ray
+     * @return List of intersection GeoPoint between the ray and triangle
+     */
+    @Override
+    public List<GeoPoint> findGeoIntersections(Ray ray) {
+
+        // Check if the ray intersect the containing plane of the triangle
+        // If not return null (sure not intersect)
+        if (plane.findGeoIntersections(ray) == null) {
+            return null;
+        }
+
+        // Create the triangle
+        Vector v1 = vertices.get(0).subtract(ray.getP0());
+        Vector v2 = vertices.get(1).subtract(ray.getP0());
+        Vector v3 = vertices.get(2).subtract(ray.getP0());
+
+        // Calculate the normals
+        Vector n1 = v1.crossProduct(v2).normalize();
+        Vector n2 = v2.crossProduct(v3).normalize();
+        Vector n3 = v3.crossProduct(v1).normalize();
+
+        Vector v = ray.getDir();
+
+        // If all in the same direction the ray intersect the triangle
+        if ((alignZero(v.dotProduct(n1)) > 0 && alignZero(v.dotProduct(n2)) > 0 && alignZero(v.dotProduct(n3)) > 0) ||
+                (alignZero(v.dotProduct(n1)) < 0 && alignZero(v.dotProduct(n2)) < 0 && alignZero(v.dotProduct(n3)) < 0)) {
+
+            // find the intersection point and return it as a list of GeoPoint
+            return List.of(new GeoPoint(this, plane.findGeoIntersections(ray).get(0)._point));
+        }
+        // If the ray not intersect the triangle
+        return null;
     }
 
     @Override
     public String toString() {
         return "Triangle{" +
-                "vertices=" + vertices.toString() +
-                ", plane=" + plane.toString() +
+                "vertices=" + vertices +
+                ", plane=" + plane +
                 '}';
-    }
-    @Override
-    public List<Point3D> findIntersections(Ray ray)
-    {
-        List<Point3D> result = plane.findIntersections(ray);
-        if(result==null)
-            return null;
-        Vector v1=(vertices.get(0).subtract(ray.getP0())),
-                v2=(vertices.get(1).subtract(ray.getP0())),
-                v3=(vertices.get(2).subtract(ray.getP0()));
-        Vector n1=(v1.crossProduct(v2)).normalize(),n2=(v2.crossProduct(v3)).normalize(),n3=(v3.crossProduct(v1)).normalize();
-
-        double side1 = ray.getDir().dotProduct(v1.crossProduct(v2));
-        double side2 = ray.getDir().dotProduct(v2.crossProduct(v3));
-        double side3 = ray.getDir().dotProduct(v3.crossProduct(v1));
-        if (isZero(side1)) return null;
-        if (isZero(side2)) return null;
-        if (isZero(side3)) return null;
-        if(side1>0&&side2>0&&side3>0||side1<0&&side2<0&&side3<0)
-        {
-            return result;
-        }
-        return null;
     }
 }

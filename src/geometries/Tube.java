@@ -6,52 +6,98 @@ import primitives.Vector;
 
 import java.util.List;
 
-import static primitives.Util.isZero;
+/**
+ * Tube class representing three-dimensional tube (infinite cylinder) in 3D Cartesian coordinate
+ * system
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
+public class Tube extends Geometry {
 
-public class Tube  extends Geometry{
-    private static final double ZERO = 0;
-    final Ray _axis;
-    final double _radius;
-    public Tube(double radius, Ray axis)/**constructor*/ {
-        if(radius==ZERO)
-            throw new IllegalArgumentException("Error: the radius is zero");
-        _radius=radius;
-        this._axis = axis;
+    protected Ray _axisRay; // The centered ray of the tube
+    protected double _radius; // The radius of the tube
 
+    /**
+     * c-tor initiate the fields with the receiving values
+     *
+     * @param axisRay The centered ray of the tube
+     * @param radius  The radius of the tube
+     */
+    public Tube(Ray axisRay, double radius) {
+        _axisRay = axisRay;
+        _radius = radius;
+    }
+
+    /**
+     * Return the centered ray of the tube
+     *
+     * @return The centered ray of the tube (Ray)
+     */
+    public Ray getAxisRay() {
+        return _axisRay;
+    }
+
+    /**
+     * Return the radius value of the tube
+     *
+     * @return The radius value of the tube (double)
+     */
+    public double getRadius() {
+        return _radius;
+    }
+
+    /**
+     * Receiving a point, calculate and return the normal of the tube in the current point.
+     *
+     * @param point A point on the tube
+     * @return The normal of the tube in the receiving point (Vector)
+     */
+    @Override
+    public Vector getNormal(Point3D point) {
+
+        Vector centeredVectorDirection = _axisRay.getDir();
+        Point3D p0 = _axisRay.getP0();
+
+        // If the projection equals to zero we cant calculate a normal.
+        double projection = centeredVectorDirection.dotProduct(point.subtract(p0));
+        if (projection == 0) throw new IllegalArgumentException("the projection cannot be 0");
+
+        // Calculate the point on the centered ray of the tube to calculate the normal with it.
+        Point3D center = p0.add(centeredVectorDirection.scale(projection));
+
+        // Calculate the normal
+        Vector v = point.subtract(center);
+        return v.normalize(); // Return the normalized normal
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tube tube = (Tube) o;
+
+        if (Double.compare(tube._radius, _radius) != 0) return false;
+        return _axisRay != null ? _axisRay.equals(tube._axisRay) : tube._axisRay == null;
+    }
+
+    /**
+     * Return list of intersection GeoPoint
+     *
+     * @param ray The light ray
+     * @return List of intersection GeoPoint
+     */
+    // NOT IMPLEMENTED
+    @Override
+    public List<GeoPoint> findGeoIntersections(Ray ray) {
+        return null;
     }
 
     @Override
     public String toString() {
         return "Tube{" +
-                "radius=" + _radius +
-                ", axis=" + axis.toString() +
+                "_axisRay=" + _axisRay +
+                ", _radius=" + _radius +
                 '}';
-    }
-
-    @Override
-    public Vector getNormal(Point3D p)
-    {
-     double t=(_axis.getDir()).dotProduct(p.subtract(_axis.getP0()));
-        Vector n ;
-        if (!isZero(t)) {
-            Point3D o=_axis.getP0().add(_axis.getDir().scale(t));
-           n = (p.subtract(o));
-        }
-        else
-            n=p.subtract(_axis.getP0()).normalize();
-        return n.normalize();
-
-    }
-
-
-    @Override
-    public List<GeoPoint> findGeoIntersections(Ray ray)
-    {
-        return null;
-    }
-    @Override
-    public List<GeoPoint> findGeoIntersections(Ray ray)
-    {
-        return null;
     }
 }

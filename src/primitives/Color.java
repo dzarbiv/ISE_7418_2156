@@ -13,16 +13,21 @@ public class Color {
      * The internal fields tx`o maintain RGB components as double numbers from 0 to
      * whatever...
      */
-    private final double r ;
-    private final double g ;
+    private final double r;
+    private final double g;
     private final double b;
 
+    /**
+     * Black color = (0,0,0)
+     */
     public static final Color BLACK = new Color();
 
     /**
      * Default constructor - to generate Black Color (privately)
      */
-    private Color() {r=g=b=0.0;}
+    private Color() {
+        r = g = b = 0.0;
+    }
 
     /**
      * Constructor to generate a color according to RGB components Each component in
@@ -72,7 +77,7 @@ public class Color {
         int ir = (int) r;
         int ig = (int) g;
         int ib = (int) b;
-        return new java.awt.Color(Math.min(ir, 255), Math.min(ig, 255), Math.min(ib, 255));
+        return new java.awt.Color(ir > 255 ? 255 : ir, ig > 255 ? 255 : ig, ib > 255 ? 255 : ib);
     }
 
     /**
@@ -118,3 +123,4 @@ public class Color {
     }
 
 }
+

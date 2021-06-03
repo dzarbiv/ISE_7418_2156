@@ -6,44 +6,62 @@ import primitives.Ray;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface Intersectable{
+/**
+ * Intersectable interface, to calculate all the intersections on geometries shapes
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
+public interface Intersectable {
+
     /**
-     * Static Internal Auxiliary Department
+     * Calculate the intersections on geometry shapes with the received ray
+     *
+     * @param ray Light ray
+     * @return List of all the intersections between the shape and the ray (List type)
+     */
+    default List<Point3D> findIntersections(Ray ray) {
+        var geoList = findGeoIntersections(ray); // Collect all the intersection points
+        return geoList == null ? null // if there is no have any intersection point return null
+                : geoList.stream().map(gp -> gp._point).collect(Collectors.toList()); // else return the intersection points
+    }
+
+    /**
+     * Find geometries intersections
+     *
+     * @param ray The light ray
+     * @return List of intersections points (List)
+     */
+    public List<GeoPoint> findGeoIntersections(Ray ray);
+
+    /**
+     * The class represent geometries points. (PDS)
      */
     public static class GeoPoint {
-        public Geometry geometry;
-        public Point3D point;
+        public Geometry _geometry;
+        public Point3D _point;
 
         /**
-         *
-         * @param geometry
-         * @param point
+         * c-tor initialize the fields to the receive values
+         * @param geometry The geometry
+         * @param point The point on the geometry
          */
         public GeoPoint(Geometry geometry, Point3D point) {
-            this.geometry = geometry;
-            this.point = point;
+            this._geometry = geometry;
+            this._point = point;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof GeoPoint)) return false;
+            if (o == null || getClass() != o.getClass()) return false;
 
             GeoPoint geoPoint = (GeoPoint) o;
 
-            if (!geometry.equals(geoPoint.geometry)) return false;
-            return point.equals(geoPoint.point);
+            if (_geometry != null ? !_geometry.equals(geoPoint._geometry) : geoPoint._geometry != null) return false;
+            return _point != null ? _point.equals(geoPoint._point) : geoPoint._point == null;
         }
-    }
-    default List<Point3D> findIntersections(Ray ray) {
-        var geoList = findGeoIntersections(ray);
-        return geoList == null ? null
-                : geoList.stream()
-                .map(gp -> gp.point)
-                .collect(Collectors.toList());
-    }
 
-    List<GeoPoint> findGeoIntersections(Ray ray);
+    }
 
 
 }

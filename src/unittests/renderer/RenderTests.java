@@ -1,9 +1,17 @@
 package unittests.renderer;
-import org.junit.Test;
-import elements.*;
-import geometries.*;
-import primitives.*;
-import renderer.*;
+
+
+import elements.AmbientLight;
+import elements.Camera;
+import geometries.Sphere;
+import geometries.Triangle;
+import org.junit.jupiter.api.Test;
+import primitives.Color;
+import primitives.Point3D;
+import primitives.Vector;
+import renderer.ImageWriter;
+import renderer.RayTracerBasic;
+import renderer.Render;
 import scene.Scene;
 
 /**
@@ -12,7 +20,7 @@ import scene.Scene;
  * @author Dan
  */
 public class RenderTests {
-    private Camera camera = new Camera(Point3D.ZERO, new Vector(0, 0, -1), new Vector(0, 1, 0)) //
+    private Camera camera = new Camera(Point3D.ZERO, new Vector(0, 1, 0), new Vector(0, 0, -1)) //
             .setDistance(100) //
             .setViewPlaneSize(500, 500);
 
@@ -22,11 +30,12 @@ public class RenderTests {
      */
     @Test
     public void basicRenderTwoColorTest() {
+
         Scene scene = new Scene("Test scene")//
                 .setAmbientLight(new AmbientLight(new Color(255, 191, 191), 1)) //
                 .setBackground(new Color(75, 127, 90));
 
-        scene.geometries.add(new Sphere(50, new Point3D(0, 0, -100)),
+        scene._geometries.add(new Sphere(new Point3D(0, 0, -100), 50),
                 new Triangle(new Point3D(-100, 0, -100), new Point3D(0, 100, -100), new Point3D(-100, 100, -100)), // up left
                 new Triangle(new Point3D(100, 0, -100), new Point3D(0, 100, -100), new Point3D(100, 100, -100)), // up right
                 new Triangle(new Point3D(-100, 0, -100), new Point3D(0, -100, -100), new Point3D(-100, -100, -100)), // down left
@@ -36,7 +45,7 @@ public class RenderTests {
         Render render = new Render() //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracerBase(new RayTracerBasic(scene));
 
         render.renderImage();
         render.printGrid(100, new Color(java.awt.Color.YELLOW));
@@ -46,30 +55,15 @@ public class RenderTests {
     /**
      * Test for XML based scene - for bonus
      */
-    @Test
-    public void basicRenderXml() {
-        Scene scene = new Scene("XML Test scene");
-        // enter XML file name and parse from XML file into scene object
-        // ...
 
-        ImageWriter imageWriter = new ImageWriter("xml render test", 1000, 1000);
-        Render render = new Render() //
-                .setImageWriter(imageWriter) //
-                .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
 
-        render.renderImage();
-        render.printGrid(100, new Color(java.awt.Color.YELLOW));
-        render.writeToImage();
-    }
     @Test
     public void basicRenderMultiColorTest() {
         Scene scene = new Scene("Test scene")//
                 .setAmbientLight(new AmbientLight(new Color(java.awt.Color.WHITE), 0.2)); //
 
-        scene.geometries.add(new Sphere(50, new Point3D(0, 0, -100)) //
-                        .setEmission(new Color(java.awt.Color.CYAN)), //
-                new Triangle(new Point3D(-100, 0, -100), new Point3D(0, 100, -100), new Point3D(-100, 100, -100)) // up left
+        scene._geometries.add(new Sphere(new Point3D(0, 0, -100), 50d), //
+                new Triangle(new Point3D(-100, 0, -100), new Point3D(0, 100, -100), new Point3D(-100, 100, -100))// up left
                         .setEmission(new Color(java.awt.Color.GREEN)),
                 new Triangle(new Point3D(100, 0, -100), new Point3D(0, 100, -100), new Point3D(100, 100, -100)), // up right
                 new Triangle(new Point3D(-100, 0, -100), new Point3D(0, -100, -100), new Point3D(-100, -100, -100)) // down left
@@ -80,8 +74,8 @@ public class RenderTests {
         ImageWriter imageWriter = new ImageWriter("color render test", 1000, 1000);
         Render render = new Render() //
                 .setImageWriter(imageWriter) //
-                .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setCamera(camera)//
+                .setRayTracerBase(new RayTracerBasic(scene));
 
         render.renderImage();
         render.printGrid(100, new Color(java.awt.Color.WHITE));

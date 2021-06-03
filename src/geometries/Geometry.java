@@ -6,51 +6,60 @@ import primitives.Point3D;
 import primitives.Vector;
 
 /**
+ * Geometry interface is the base level of all the geometries'
  *
+ * @author devora zarbiv and rachel lea kohen
  */
-public abstract class Geometry  implements Intersectable{
-     /**
-      * returns a nurmal for a given point on the geometry
-      * @param p0 a point on the geometry
-      * @return a normal vector
-      */
-     protected Color emission=Color.BLACK;
-     public abstract Vector getNormal(Point3D p0);
-     private Material _material=new Material();
+public abstract class Geometry implements Intersectable {
+
+     protected Color emission = Color.BLACK; // The color of the geometry
+     private Material _material = new Material(); // The material type of the geometry
 
      /**
-      * getter
-      * @return material
+      * Calculate the normal of the geometry in the received point
+      *
+      * @param point Point on the surface of the geometry shape
+      * @return The normal of the geometry shape (Vector type)
+      */
+     public abstract Vector getNormal(Point3D point);
+
+     /**
+      * Return the emission of the object
+      *
+      * @return The emission (Color)
+      */
+     public Color getEmission() {
+          return emission;
+     }
+
+     /**
+      * Return the material type of the geometry
+      *
+      * @return the material of the geometry (Material)
       */
      public Material getMaterial() {
           return _material;
      }
 
      /**
+      * Set the emission of the object
       *
-      * @param material
-      * @return The geometry itself
+      * @param emission the emission of the object
+      * @return this
+      */
+     public Geometry setEmission(Color emission) {
+          this.emission = emission;
+          return this; // return this for chaining
+     }
+
+     /**
+      * Set the material type of the geometry
+      *
+      * @param material The material type of the geometry (Material)
+      * @return the geometry (Geometry)
       */
      public Geometry setMaterial(Material material) {
           _material = material;
-          return this;
+          return this; // return this for chaining
      }
-
-     /**
-      *
-      * @return
-      */
-     public Color getEmission() {
-          return emission;
-     }
-     /**
-      *
-      * @param _emmission
-      * @return
-      */
-     public Geometry setEmission(Color _emmission){
-          emission=_emmission;
-          return this;
-     }
-
 }

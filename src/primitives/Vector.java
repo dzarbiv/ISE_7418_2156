@@ -1,106 +1,195 @@
 package primitives;
 
-/***A foundational object in geometry with direction and size, defined by the end point*/
+import static primitives.Point3D.ZERO;
+
+/**
+ * Vector class representing a vector in the space (3D).
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
 public class Vector {
-    private static final Point3D ZERO = null;
-    protected Point3D head;
 
-    public Vector( Point3D head) /**constructor*/
-    {
-        if (head.equals(ZERO))
-           throw new IllegalArgumentException("Vector 0 was inserted");
-        this.head = head;
+    /**
+     * The head of the vector
+     */
+    Point3D _head;
 
+    /**
+     * c-tor, initiate the coordinate of the vector's head with the receiving values
+     *
+     * @param x The x coordinate
+     * @param y The y coordinate
+     * @param z The z coordinate
+     */
+    public Vector(double x, double y, double z) {
+        //Creating the new point with the receiving coordinates
+        Point3D newPoint = new Point3D(x, y, z);
+
+        // Check if the coordinates create the ZERO vector, because in our program its can't be.
+        if (newPoint.equals(ZERO)) throw new IllegalArgumentException("The vector cannot be the 'zero vector' ");
+
+        // Update the head to be the created point
+        _head = new Point3D(x, y, z);
     }
 
-    public Vector(double x, double y, double z) /***constructor*/
-    {
-       this(new Point3D(x,y,z));
+    /**
+     * c-tor, initiate the coordinate of the vector's head with the receiving point's coordinates
+     *
+     * @param head The point to initiate the coordinate with
+     */
+    public Vector(Point3D head) {
+        // Check if the coordinates create the ZERO vector, because in our program its can't be.
+        if (head.equals(ZERO)) throw new IllegalArgumentException("The vector cannot be the 'zero vector' ");
+        _head = head;
     }
 
-    public Vector(Coordinate x, Coordinate y, Coordinate z)/**constructor*/
-    {
-        this(new Point3D(x,y,z));
+    /**
+     * Adding two vectors, 'this' and the received one
+     *
+     * @param vector The vector to add to 'this'
+     * @return New vector after adding (Vector)
+     */
+    public Vector add(Vector vector) {
+        Vector newVector = new Vector(getHead().getX() + vector.getHead().getX(),
+                getHead().getY() + vector.getHead().getY(),
+                getHead().getZ() + vector.getHead().getZ());
+
+        return newVector;
     }
 
-    public Point3D getHead()/**getter*/
-    {
-        return head;
+    /**
+     * Subtract the receiving Vector coordinates from 'this' Vector coordinates.
+     *
+     * @param vector The vector to subtract from 'this'
+     * @return New vector after subtracting (Vector)
+     */
+    public Vector subtract(Vector vector) {
+        Vector newVector = new Vector(getHead().getX() - vector.getHead().getX(),
+                getHead().getY() - vector.getHead().getY(),
+                getHead().getZ() - vector.getHead().getZ());
+
+        return newVector;
     }
 
-    @Override
-    public boolean equals(Object obj)/**The operation compares the object on which it is applied to the object received as a parameter*/
-    {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (!(obj instanceof Vector)) return false;
-        Vector other = (Vector) obj;
-        return this.head.equals(other.head);
+    /**
+     * Scaling vector by a receiving scalar
+     *
+     * @param scalar The scalar scaling value
+     * @return New vector after scaling (Vector)
+     */
+    public Vector scale(double scalar) {
+
+        return new Vector(getHead().getX() * scalar, getHead().getY() * scalar, getHead().getZ() * scalar);
     }
 
-    @Override
-    public String toString() /**The operation returns a string with the values of all the field fields*/
-    {
-        return "Vector{" +
-                "head=" + head.toString() +
-                '}';
+
+    /**
+     * Calculating an dot product between two vectors
+     * by summarize the scaling results between the coordinates
+     *
+     * @param vector The vector to product with
+     * @return The dot product result (double)
+     */
+    public double dotProduct(Vector vector) {
+        return (getHead().getX() * vector.getHead().getX() +
+                getHead().getY() * vector.getHead().getY() +
+                getHead().getZ() * vector.getHead().getZ());
     }
 
-    public Vector add(Vector other)/**Connecting vectors*/
-    {
-        return (new Vector(this.head.x.coord + other.head.x.coord, this.head.y.coord + other.head.y.coord, this.head.z.coord + other.head.z.coord));
+    /**
+     * Calculate cross product between two vectors
+     *
+     * @param vector The vector to product with
+     * @return The new Vector with the coordinates after scaling (Vector)
+     */
+    public Vector crossProduct(Vector vector) {
+        return new Vector(
+                getHead().getY() * vector.getHead().getZ() - getHead().getZ() * vector.getHead().getY(),
+                getHead().getZ() * vector.getHead().getX() - getHead().getX() * vector.getHead().getZ(),
+                getHead().getX() * vector.getHead().getY() - getHead().getY() * vector.getHead().getX()
+        );
     }
 
-    public Vector subtract(Vector other)/**Subtraction of vectors*/
-    {
-        return (new Vector(this.head.x.coord - other.head.x.coord, this.head.y.coord - other.head.y.coord, this.head.z.coord - other.head.z.coord));
+    /**
+     * Calculate the length of the vector (powered by 2)
+     *
+     * @return The squared length of the vector (double)
+     */
+    public double lengthSquared() {
+        return getHead().getX() * getHead().getX()
+                + getHead().getY() * getHead().getY()
+                + getHead().getZ() * getHead().getZ();
     }
 
-    public Vector scale(double num)/**Vector multiplication by number*/
-    {
-        return (new Vector(this.head.x.coord * num, this.head.y.coord * num, this.head.z.coord * num));
+
+    /**
+     * Calculate the length of the vector
+     *
+     * @return The length of the vector (double)
+     */
+    public double length() {
+        return Math.sqrt(this.lengthSquared());
     }
 
-    public double dotProduct( Vector other)/**Scalar product*/
-    {
-        return ((this.head.x.coord * other.head.x.coord) + (this.head.y.coord * other.head.y.coord) + (this.head.z.coord * other.head.z.coord));
-    }
+    /**
+     * Normalize the vector
+     *
+     * @return The normalized vector (Vector)
+     */
+    public Vector normalize() {
 
-    public Vector crossProduct(Vector other) /**Vector multiplication - Returns a new vector that stands for the two existing vectors*/
-    {
-        double x, y, z;
-        x = (((this.head.y.coord) * (other.head.z.coord)) - ((this.head.z.coord) * (other.head.y.coord)));
-        y = (((this.head.z.coord) * (other.head.x.coord)) - ((this.head.x.coord) * (other.head.z.coord)));
-        z = (((this.head.x.coord) * (other.head.y.coord)) - ((this.head.y.coord) * (other.head.x.coord)));
-        Point3D p=new Point3D(x,y,z);
-        if(p.equals(Point3D.ZERO))
-            throw new IllegalArgumentException("Vector 0 was inserted");
-        return (new Vector(x, y, z));
-    }
+        //Calculate the length of the vector to reduce the coordinate with
+        double length = this.length();
 
-    public double lengthSquared()/** Calculate the length of the vector squared*/
-    {
-       return this.dotProduct(this);
-    }
-    public double length()/**Calculation of the length of the vector*/
-    {
-        return Math.sqrt(lengthSquared());
-    }
-    public Vector normalize()/**The vector normalization action that will change the vector itself*/
-    {
-        double x, y ,z;
-        x=(head.x.coord)/this.length();
-        y=(head.y.coord)/this.length();
-        z=(head.z.coord)/this.length();
-        head=new Point3D(x,y,z);
+        //Normalize the vector
+        Point3D newPoint = new Point3D(
+                getHead().getX() / length,
+                getHead().getY() / length,
+                getHead().getZ() / length
+        );
+
+        _head = newPoint;
+
         return this;
     }
-    public Vector normalized()/**A normalization operation that returns a new normalized vector in the same direction as the original vector*/
-    {
-        /**Vector v=this;
-        return v.normalize();*/
-        Vector v=new Vector(this.normalize().head);
-        return v;
+
+    /**
+     * Return a new normalize vector
+     *
+     * @return The new normalized vector
+     */
+    public Vector normalized() {
+
+        // Create new vector with the same values
+        Vector newVector = new Vector(getHead());
+
+        // normalized and return the new vector
+        return newVector.normalize();
     }
 
+    /**
+     * Return the head point of the vector
+     *
+     * @return The head point of the vector (Point3D)
+     */
+    public Point3D getHead() {
+        return _head;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Vector vector = (Vector) o;
+
+        return _head != null ? _head.equals(vector._head) : vector._head == null;
+    }
+
+    @Override
+    public String toString() {
+        return "Vector{" +
+                "_head=" + _head +
+                '}';
+    }
 }

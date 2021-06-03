@@ -4,51 +4,90 @@ import primitives.Point3D;
 import primitives.Ray;
 import primitives.Vector;
 
-import java.util.List;
 
+/**
+ * Cylinder class representing a three-dimensional cylinder in 3D Cartesian coordinate
+ * system
+ *
+ * @author devora zarbiv and rachel lea kohen
+ */
 public class Cylinder extends Tube {
-    private static final double ZERO = 0;
-    protected double height;
 
-    public Cylinder(double radius, Ray axis, double height)/**constructor*/ {
-        super(radius, axis);
-        if(height==ZERO)
-            throw new IllegalArgumentException("Error: the radius is zero");
-        this.height = height;
+    double _height; //The height of the cylinder
+
+    /**
+     * Cylinder c-tor receiving a Ray, and two doubles
+     *
+     * @param axisRay The centered ray of the cylinder
+     * @param radius  The radius of the cylinder
+     * @param height  The height of the cylinder
+     */
+    public Cylinder(Ray axisRay, double radius, double height) {
+        super(axisRay, radius); // initialize the fields to the received values
+        _height = height;
+    }
+
+    /**
+     * Return the height of the cylinder
+     *
+     * @return The height of the cylinder (double)
+     */
+    public double getHeight() {
+        return _height;
+    }
+
+
+    /**
+     * Return the normal vector of the cylinder
+     *
+     * @param point The point to measure the normal (Point3D)
+     * @return The normal of cylinder (Vector)
+     */
+    @Override
+    public Vector getNormal(Point3D point) {
+
+        // The center of sides of the cylinder
+        Vector directionOfCylinder = _axisRay.getDir();
+        Point3D centerOfOneSide = _axisRay.getP0();
+        Point3D centerOfSecondSide = _axisRay.getP0().add(_axisRay.getDir().scale(_height));
+
+        // If the point is the center base (on the sides of the cylinder)
+        if (point.equals(centerOfOneSide) || point.equals(centerOfSecondSide)) {
+            // return the centered ray
+            return directionOfCylinder;
+        }
+
+        double projection = directionOfCylinder.dotProduct(point.subtract(centerOfOneSide));
+        //If the point is on the bases but not the center point
+        if (projection == 0) {
+            Vector v1 = point.subtract(centerOfOneSide);
+            return v1.normalize();
+        }
+
+        //If the point is on the side of the cylinder
+        Point3D center = centerOfOneSide.add(directionOfCylinder.scale(projection));
+        Vector v = point.subtract(center);
+        return v.normalize();
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Cylinder cylinder = (Cylinder) o;
+
+        return Double.compare(cylinder._height, _height) == 0;
     }
 
     @Override
     public String toString() {
-        return "Cylinder{" + super.toString()+
-                "height=" + height + '}';
-    }
-
-    @Override
-    public Vector getNormal(Point3D p) {
-        Vector n ;
-        /**If the point is on one of the bases of the final cylinder*/
-        if(p.equals(_axis.getP0())||p.equals(_axis.getP0().add(_axis.getDir().scale(height))))
-        {
-            /**If the point is in the middle of the circle of the beginning of the final cylinder*/
-           if(p== _axis.getP0())
-               n= _axis.getDir().scale(-1);/**Return -v*/
-           else/**If the point is in the middle of the circle of the end of the final cylinder*/
-               n= _axis.getDir();/**return v*/
-        }
-        else {
-            double t = (_axis.getDir()).dotProduct(p.subtract(_axis.getP0()));
-            if (t <= height) {
-                Point3D o = _axis.getP0().add(_axis.getDir().scale(t));
-                n = (p.subtract(o)).normalize();
-            }
-        else/**The point is not on the cylinder*/
-            throw new IllegalArgumentException("Error: the point does not on the cylinder");
-        }
-        return n.normalize();
-    }
-
-    @Override
-    public List<Point3D> findIntersections(Ray ray) {
-        return null;
+        return "Cylinder{" +
+                "_height=" + _height +
+                ", _axisRay=" + _axisRay +
+                ", _radius=" + _radius +
+                '}';
     }
 }
