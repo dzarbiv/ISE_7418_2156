@@ -3,8 +3,8 @@
  * @id 315437418
  * @email devorazer@gmail.com
  * @author rachel lea kohen
- * @id
- * @email
+ * @id 211372156
+ * @email rachelea777@gmail.com
  */
 
 import primitives.Point3D;
