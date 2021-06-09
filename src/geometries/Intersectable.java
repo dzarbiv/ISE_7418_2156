@@ -40,6 +40,14 @@ public interface Intersectable {
         public Geometry _geometry;
         public Point3D _point;
 
+        public Geometry getGeometry() {
+            return _geometry;
+        }
+
+        public Point3D getPoint() {
+            return _point;
+        }
+
         /**
          * c-tor initialize the fields to the receive values
          * @param geometry The geometry

@@ -161,11 +161,12 @@ public class myImage {
         scene._lightSourceList.add( //
                 new SpotLight(new Color(700, 400, 400), new Point3D(100, 0, 150), new Vector(-1, -1, -4)) //
                         .setKl(4E-4).setKq(2E-5));
+        ImageWriter imageWriter = new ImageWriter("OurPicture", 600, 600);
 
-        Render render = new Render() //
-                .setImageWriter(new ImageWriter("OurPicture", 600, 600)) //
+        Render render = new Render(scene,camera,imageWriter) //
+                .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
         render.renderImage();
         render.writeToImage();
     }

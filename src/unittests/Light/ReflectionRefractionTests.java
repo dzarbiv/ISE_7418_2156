@@ -39,10 +39,10 @@ public class ReflectionRefractionTests {
                 new SpotLight(new Color(1000, 600, 0), new Point3D(-100, -100, 500), new Vector(-1, -1, -2)) //
                         .setKl(0.0004).setKq(0.0000006));
 
-        Render render = new Render() //
+        Render render = new Render(scene,camera) //
                 .setImageWriter(new ImageWriter("refractionTwoSpheres", 500, 500)) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
         render.renderImage();
         render.writeToImage();
     }
@@ -77,10 +77,10 @@ public class ReflectionRefractionTests {
                 .setKl(0.00001).setKq(0.000005));
 
         ImageWriter imageWriter = new ImageWriter("reflectionTwoSpheresMirrored", 500, 500);
-        Render render = new Render() //
+        Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
 
         render.renderImage();
         render.writeToImage();
@@ -110,10 +110,10 @@ public class ReflectionRefractionTests {
                 .setKl(4E-5).setKq(2E-7));
 
         ImageWriter imageWriter = new ImageWriter("refractionShadow", 600, 600);
-        Render render = new Render() //
+        Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
 
         render.renderImage();
         render.writeToImage();
@@ -152,10 +152,10 @@ public class ReflectionRefractionTests {
                 .setKl(0.00000000001).setKq(0.0000000001));
 
         ImageWriter imageWriter = new ImageWriter("reflectionRefractionFiveObjectsTest", 600, 600);
-        Render render = new Render() //
+        Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
 
         render.renderImage();
         render.writeToImage();

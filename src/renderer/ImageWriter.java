@@ -22,6 +22,7 @@ public class ImageWriter {
     // The view plane size (width pixels and height pixels)
     private int nX;
     private int nY;
+    private double _imageWidth, _imageHeight;
 
     // The path to the images directory
     private static final String FOLDER_PATH = System.getProperty("user.dir") + "/images";
@@ -99,4 +100,40 @@ public class ImageWriter {
         image.setRGB(xIndex, yIndex, color.getColor().getRGB());
     }
 
+    public void writePixel(int xIndex, int yIndex, java.awt.Color color){
+        image.setRGB(xIndex, yIndex, color.getRGB());
+    }
+
+
+    public int getnX() {
+        return nX;
+    }
+
+    public int getnY() {
+        return nY;
+    }
+
+    public static String getFolderPath() {
+        return FOLDER_PATH;
+    }
+
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public double getWidth() {
+        return _imageWidth;
+    }
+
+    public double getHeight() {
+        return _imageHeight;
+    }
 }

@@ -167,6 +167,9 @@ public class Vector {
         return newVector.normalize();
     }
 
+
+
+
     /**
      * Return the head point of the vector
      *

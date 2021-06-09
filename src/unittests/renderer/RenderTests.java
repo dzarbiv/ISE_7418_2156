@@ -42,19 +42,16 @@ public class RenderTests {
                 new Triangle(new Point3D(100, 0, -100), new Point3D(0, -100, -100), new Point3D(100, -100, -100))); // down right
 
         ImageWriter imageWriter = new ImageWriter("base render test", 1000, 1000);
-        Render render = new Render() //
+        Render render = new Render(scene, camera,imageWriter) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
 
         render.renderImage();
-        render.printGrid(100, new Color(java.awt.Color.YELLOW));
+        render.printGrid(100, new Color(java.awt.Color.yellow));
         render.writeToImage();
     }
 
-    /**
-     * Test for XML based scene - for bonus
-     */
 
 
     @Test
@@ -72,10 +69,10 @@ public class RenderTests {
                         .setEmission(new Color(java.awt.Color.BLUE)));
 
         ImageWriter imageWriter = new ImageWriter("color render test", 1000, 1000);
-        Render render = new Render() //
+        Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera)//
-                .setRayTracerBase(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene));
 
         render.renderImage();
         render.printGrid(100, new Color(java.awt.Color.WHITE));

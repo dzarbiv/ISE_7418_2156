@@ -144,6 +144,20 @@ public class Point3D {
         return _z != null ? _z.equals(point3D._z) : point3D._z == null;
     }
 
+
+    /**
+     * subtract Vector to point
+     * @param v- Vector
+     * @return new point
+     */
+
+    public Point3D subtract(Vector v) {
+        return new Point3D(this._x.coord - v._head._x.coord,
+                this._y.coord - v._head._y.coord,
+                this._z.coord - v._head._z.coord);
+    }
+
+
     @Override
     public String toString() {
         return "(" +

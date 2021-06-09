@@ -97,4 +97,24 @@ public class Material {
         // return this for chaining
         return this;
     }
+
+    public double getkD() {
+        return kD;
+    }
+
+    public double getkS() {
+        return kS;
+    }
+
+    public int getnShininess() {
+        return nShininess;
+    }
+
+    public double getkT() {
+        return _kT;
+    }
+
+    public double getkR() {
+        return _kR;
+    }
 }

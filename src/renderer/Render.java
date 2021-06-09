@@ -1,86 +1,827 @@
 package renderer;
 
 import elements.Camera;
-import primitives.Color;
-import primitives.Ray;
+import elements.LightSource;
+import geometries.Intersectable;
+import primitives.*;
+import scene.Scene;
 
+import java.util.List;
 import java.util.MissingResourceException;
 
+import static primitives.Util.alignZero;
+
+/**
+ * Renderer class is responsible for generating pixel color map from a graphic
+ * scene, using ImageWriter class
+ *
+ * @author Dan
+ *
+ */
 public class Render {
-    private ImageWriter _imageWriter = null;
-    private Camera _camera = null;
-    private RayTracerBase _rayTracer = null;
+    private final Scene _scene;
+    private Camera camera;
+    private boolean superSampling;//is super sampling wanted?
+    private ImageWriter imageWriter;
+    private RayTracerBase tracer;
+    private static final String RESOURCE_ERROR = "Renderer resource not set";
+    private static final String RENDER_CLASS = "Render";
+    private static final String IMAGE_WRITER_COMPONENT = "Image writer";
+    private static final double MIN_CALC_COLOR_K = 0.0000001;//minimum transparency level for transparency rays
+    private static final int NUM_OF_SAMPLE_RAYS = 9; //81 rays throw pixel for super sampling
+    private static final int LEVEL_OF_ADAPTIVE = NUM_OF_SAMPLE_RAYS/2;//number of times to repeat recursion of adaptive super samling
 
-    public Render setImageWriter(ImageWriter imageWriter) {
-        _imageWriter = imageWriter;
-        return this;
-    }
-
-    public Render setCamera(Camera camera) {
-        _camera = camera;
-        return this;
-    }
-
-
-    public Render setRayTracer(RayTracerBase rayTracer) {
-        _rayTracer = rayTracer;
-        return this;
-    }
+    private static final String CAMERA_COMPONENT = "Camera";
+    private static final String RAY_TRACER_COMPONENT = "Ray tracer";
+    private static final int MAX_CALC_COLOR_LEVEL = 50; //the maximum recursion level for calcColor
+    private boolean adaptiveSuperSampling;//is adaptive super sampling wanted?
+    private static final double DELTA = 0.1;//small number used for scaling shadow rays
+    private int _threads = 1;//number of threads to use when running program- default is one
+    private int threadsCount = 0;
+    private static final int SPARE_THREADS = 2; // Spare threads if trying to use all the cores
+    private boolean _print = true;//print completion of thread?
 
     /**
-     * This will first check that a blank value has been entered in all fields and then throw an exception
+     * Constructor for render
+     * @param _scene scene to render
      */
-    public void renderImage() {
-        try {
-            if (_imageWriter == null)
-                throw new MissingResourceException("missing resource", ImageWriter.class.getName(), "");
-            if (_camera == null)
-                throw new MissingResourceException("missing resource", Camera.class.getName(), "");
-            if (_rayTracer == null)
-                throw new MissingResourceException("missing resource", RayTracerBase.class.getName(), "");
-            //rendering the image
-            int nX = _imageWriter.getNx();
-            int nY = _imageWriter.getNy();
-            for (int i = 0; i < nY; i++) {
-                for (int j = 0; j < nX; j++) {
-                    Ray ray = _camera.constructRayThroughPixel(nX, nY, j, i);
-                    Color pixelColor = _rayTracer.traceRay(ray);
-                    _imageWriter.writePixel(j, i, pixelColor);
-                }
-            }
-        } catch (MissingResourceException e) {
-            throw new UnsupportedOperationException("not implemented yet" + e.getClassName());
-        }
+    public Render(Scene _scene,Camera _camera) {
+        this._scene = _scene;
+        setCamera(_camera);
+        superSampling=true;
+        adaptiveSuperSampling=false;
     }
 
     /**
-     * Will create a network of lines similar to what was performed in the test in the first stage
-     * First the method will first check that a non-empty value was entered in the field of the image manufacturer
+     * constructor for render
+     * @param scene scene to render
+     * @param imageWriter image writer
+     */
+    public Render(Scene scene,Camera _camera, ImageWriter imageWriter) {
+        this.imageWriter = imageWriter;
+        this._scene = scene;
+        setCamera(_camera);
+        superSampling=true;
+        adaptiveSuperSampling=false;
+    }
+
+    /**
+     * Constructor for Render that also receives from user wethere he would like to use improvements in the picture
+     * @param scene scene to render
+     * @param imageWriter image writer
+     * @param _superSampling is super sampling requested
+     * @param _adaptiveSuperSampling is adaptive super sampling requested
+     */
+    public Render(Scene scene, ImageWriter imageWriter,boolean _superSampling,boolean _adaptiveSuperSampling){
+        this.imageWriter = imageWriter;
+        this._scene = scene;
+        superSampling=_superSampling;
+        adaptiveSuperSampling=_adaptiveSuperSampling;
+    }
+    /**
+     * Set multi-threading <br>
+     * - if the parameter is 0 - number of cores less 2 is taken
      *
-     * @param interval
-     * @param color
+     * @param threads number of threads
+     * @return the Render object itself
      */
-    public void printGrid(int interval, Color color) {
-        if (_imageWriter == null)
-            throw new MissingResourceException("missing resource", ImageWriter.class.getName(), "");
-        int nX = _imageWriter.getNx();
-        int nY = _imageWriter.getNy();
-        for (int i = 0; i < nY; i++) {
-            for (int j = 0; j < nX; j++) {
-                if (i % interval == 0 || j % interval == 0) {
-                    _imageWriter.writePixel(j, i, color);
+    public Render setMultithreading(int threads) {
+        if (threads < 0)
+            throw new IllegalArgumentException("Multithreading parameter must be 0 or higher");
+        if (threads != 0)
+            this.threadsCount = threads;
+        else {
+            int cores = Runtime.getRuntime().availableProcessors() - SPARE_THREADS;
+            this.threadsCount = cores <= 2 ? 1 : cores;
+        }
+        return this;
+    }
+    /**
+     * Camera setter
+     *
+     * @param _camera to set
+     * @return renderer itself - for chaining
+     */
+    public Render setCamera(Camera _camera) {
+        camera = _camera;
+        _scene.setCamera(camera);
+        return this;
+    }
+
+    /**
+     * Ray tracer setter
+     *
+     * @param _tracer to use
+     * @return renderer itself - for chaining
+     */
+    public Render setRayTracer(RayTracerBase _tracer) {
+        this.tracer = _tracer;
+        return this;
+    }
+    /**
+     * Set debug printing on
+     *
+     * @return the Render object itself
+     */
+    public Render setDebugPrint() {
+        _print = true;
+        return this;
+    }
+    public Render setImageWriter(ImageWriter _imageWriter) {
+        imageWriter = _imageWriter;
+        return this;
+    }
+
+    /**
+     * @param l vector from light source to geometry
+     * @param n normal of geometry
+     * @param gp GeoPoint
+     * @param lightSource light source
+     * @return true if point on geometry is not shaded by other objects, otherwise false
+     */
+    private boolean unshaded(Vector l, Vector n, Intersectable.GeoPoint gp, LightSource lightSource){
+        Vector lightDirection = l.scale(-1); //vector from point to light source
+
+        Vector delta = n.scale(n.dotProduct(lightDirection) > 0 ? DELTA : -DELTA);//if the dot product between light direction and the normal off the geometry is bigger than zero, scale the normal by delta (a very small number), otherwise scale by -delta
+        Point3D point = gp.getPoint().add(delta);//move point that color will be calculated in a bit closer to light
+        Ray lightRay = new Ray(point, lightDirection);//create a shadow ray from the point to the light source
+
+        List<Intersectable.GeoPoint> intersections = _scene.getGeometries().findGeoIntersections(lightRay);//find the intersection of the shadow ray with geometries in scene that may be blocking the light
+        if (intersections == null) {//there are no intersection points
+            return true;
+        }
+        double lightDistance = lightSource.getDistance(gp.getPoint());//get distance of light source from geometry
+        for (Intersectable.GeoPoint gp2 : intersections) {
+            if (alignZero(gp2.getPoint().distance(gp.getPoint()) - lightDistance) <= 0)
+                return false;//check every geometry that shadow ray intersected. if their distance from the geometry is smaller than the distance of the light source from the geometry then they are blocking the light, and the geometry is shaded.
+        }
+        return true;//if all geometries were behing light, the geometry is unshaded.
+    }
+
+    /**
+     * @param light light source
+     * @param l vector from light source to geometry
+     * @param n normal of geometry
+     * @param geopoint GeoPoint
+     * @return level of transparency of object
+     */
+    private double transparency(LightSource light, Vector l, Vector n, Intersectable.GeoPoint geopoint) {
+        double transparency_level=1;
+        double un_transparency_level=0;
+        Vector lightDirection = l.scale(-1); // from point to light source
+        Ray lightRay = new Ray(geopoint.getPoint(), lightDirection, n);//ray in opposite direction of vector L from light, scaled by delta
+        Point3D pointGeo = geopoint.getPoint();
+
+        List<Intersectable.GeoPoint> intersections = _scene.getGeometries().findGeoIntersections(lightRay);//geometries that might be in between light source and geometry
+        if (intersections == null) {
+            return transparency_level;//if there are no geometries that intersect with the ray then it is transparent
+        }
+        double lightDistance = light.getDistance(pointGeo);//distance of light source from geometry
+        double ktr = transparency_level;//transparency level
+        for (Intersectable.GeoPoint gp : intersections) {
+            //for each geometry that was intersected by ray, check whethter it is
+            //located in front or behind the light: if the distance from the geometry to
+            // the point is smaller than the distance of the light source to the point
+            // then it is in front of the light.
+            if (alignZero(gp.getPoint().distance(pointGeo) - lightDistance) <= 0) {
+                //if the geometry was in front of the light multiply ktr by its transparency level
+                ktr *= gp.getGeometry().getMaterial().getkT();
+                if (ktr < MIN_CALC_COLOR_K) {
+                    //if it is smaller than MIN_CALC_COLOR_K then consider it opaque,
+                    // no light goes through it and its transparency level is zero
+                    return un_transparency_level;
+                }
+            }
+        }
+        return ktr;//return ktr
+    }
+
+
+    /**
+         * This function renders image's pixel color map from the scene included with
+         * the Renderer object
+         */
+
+        public void renderImage() {
+            Camera camera = _scene.getCamera();
+            double distance = _scene.getDistance();
+
+            //width and height are the width and height of the image.
+            int width = (int) imageWriter.getWidth();
+            int height = (int) imageWriter.getHeight();
+
+            //Nx and Ny are the number of pixels in the rows
+            //and columns of the view plane
+            int Nx = imageWriter.getNx(); //columns
+            int Ny = imageWriter.getNy(); //rows
+
+            final Pixel thePixel = new Pixel(Ny, Nx);
+
+            //create thread foreach ray calculation
+            Thread[] threads = new Thread[_threads];
+            for (int i = _threads - 1; i >= 0; --i) {
+                threads[i] = new Thread(() -> {
+                    Pixel pixel = new Pixel();
+
+                    while (thePixel.nextPixel(pixel)) {
+                        if (superSampling == false) {//         without super sampling
+                            //create ray throw this pixel
+                            Ray ray = camera.constructRayThroughPixel(Nx, Ny, pixel.col, pixel.row, camera.getWidth(), camera.getHeight(),camera.getDistance());
+                            Color pixelColor = calcColor(ray);  //calculate the color for the pixel
+                            imageWriter.writePixel(pixel.col, pixel.row, pixelColor.getColor());  //write the color to the pixel
+                        } else {//super sampling
+                            if (adaptiveSuperSampling == true){//         super sampling and adaptive
+                                //calculate the color for the pixel using adaptive improve
+                                Color result = adaptiveSuperSampling(camera, camera.getDistance(), Nx, Ny, camera.getWidth(), camera.getHeight(), pixel.col, pixel.row);
+                                imageWriter.writePixel(pixel.col, pixel.row, result.getColor()); //write the color to the pixel
+                            }
+                            else {//        super sampling without adaptive
+                                //calculate the color for the pixel using super sampling improve
+                                Color pixelColor = superSampling(camera, camera.getDistance(), (int)camera.getWidth(), (int)camera.getHeight(), Nx, Ny, pixel);
+                                imageWriter.writePixel(pixel.col, pixel.row, pixelColor.getColor()); //write the color to the pixel
+                            }
+                        }
+
+                    }
+                });
+            }
+            // Start threads
+            for (Thread thread : threads) thread.start();
+            // Wait for all threads to finish
+            for (Thread thread : threads) {
+                try {
+                    thread.join();
+                } catch (Exception e) {
+                }
+            }
+            if (_print) {
+                printMessage("100%\n");
+            }
+        }
+    /**
+     * This function returns the color in pixels using the enhanced calculation super Sampling
+     * @param camera the scene camera
+     * @param distance the distance from the camera to the center of the screen
+     * @param width width of the screen
+     * @param height height of the screen
+     * @param nx number of pixel on the x axis
+     * @param ny number of pixel on the y axis
+     * @param pixel the pixel to calculate its color
+     * @return color of pixel
+     */
+    private Color superSampling(Camera camera, double distance, int width, int height, int nx, int ny, Pixel pixel) {
+        List<Ray> rays = camera.constructRaysThroughPixel(nx, ny, pixel.col, pixel.row, distance, width, height, NUM_OF_SAMPLE_RAYS);  //calculate rays throw this pixel
+        return calcColor(rays);  //calculate the color of the pixel
+    }
+
+    /**
+     * Finding the closest point to the P0 of the camera.
+     * @param intersectionPoints list of points, the function should find from
+     *                           this list the closet point to P0 of the camera in the scene.
+     * @return the closest point to the camera
+     */
+
+    private Intersectable.GeoPoint getClosestPoint(List<Intersectable.GeoPoint> intersectionPoints) {
+        Intersectable.GeoPoint result = null;
+        double mindist = Double.MAX_VALUE; //max number
+
+        Point3D p0 = this._scene.getCamera().getP0();
+
+        for (Intersectable.GeoPoint geo : intersectionPoints) { //foreach intersection point
+            Point3D pt = geo.getPoint();
+            double distance = p0.distance(pt); //the distance between the point and the camera
+            if (distance < mindist) {  //set the new minimum distance
+                mindist = distance;
+                result = geo;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Printing the grid with a fixed interval between lines
+     *
+     * @param interval The interval between the lines.
+     * @param colorsep the color of the lines
+     */
+    public void printGrid(int interval, Color colorsep) {
+        double rows = this.imageWriter.getNy();
+        double collumns = imageWriter.getNx();
+        //Writing the lines.
+        for (int row = 0; row < rows; ++row) {
+            for (int collumn = 0; collumn < collumns; ++collumn) {
+                if (collumn % interval == 0 || row % interval == 0) {
+                    imageWriter.writePixel(collumn, row, colorsep);
                 }
             }
         }
     }
 
     /**
-     * Initially the method will check that in the field of the image manufacturer a non-empty value was entered
-     * and in case of lack of throwing a suitable deviation
+     * Produce a rendered image file
      */
     public void writeToImage() {
-        if (_imageWriter == null)
-            throw new MissingResourceException("missing resource", ImageWriter.class.getName(), "");
-        _imageWriter.writeToImage();
+        if (imageWriter == null)
+            throw new MissingResourceException(RESOURCE_ERROR, RENDER_CLASS, IMAGE_WRITER_COMPONENT);
+
+        imageWriter.writeToImage();
+    }
+
+    /**
+     * calculate the avarage color of the rays in the list
+     * @param superSamplingRays list of rays
+     * @return color
+     */
+    private Color calcColor(List<Ray> superSamplingRays){
+        Color color = Color.BLACK;
+        for(Ray ray: superSamplingRays){    //Calculate the color for each of the rays
+            color = color.add(calcColor(ray));  //sum up the color scheme
+        }
+        color = color.reduce(superSamplingRays.size());   //Reduces the result color by the number of rays in the list (average calculation)
+        return color;
+    }
+
+    /**
+     * recursive fucntion to calculate color in certain point
+     * @param coloredPoint GeoPoint- the point on the geometry where color is calculated
+     * @param inRay ray
+     * @param level counts how many times recursion has occured
+     * @param k k
+     * @return color of point
+     */
+    private Color calcColor(Intersectable.GeoPoint coloredPoint, Ray inRay, int level, double k) {
+        List<LightSource> lightSources = _scene.getLightSourceList(); //the light sources of the scene
+        Color result = coloredPoint.getGeometry().getEmission(); //emission light of geometry
+
+        Vector v = coloredPoint.getPoint().subtract(_scene.getCamera().getP0()).normalize();//vector from camera to geometry
+        Vector n = coloredPoint.getGeometry().getNormal(coloredPoint.getPoint());//normal to the point on the geometry
+
+        Material material = coloredPoint.getGeometry().getMaterial();
+        int nShininess = material.getnShininess();
+        double kd = material.getkD();
+        double ks = material.getkS();
+
+        if (lightSources != null) {
+            for (LightSource lightSource : lightSources) { //for each light source calculate the color in the point
+                Vector l = lightSource.getL(coloredPoint.getPoint());//vector from light source to point on geometry
+                double nl = alignZero(n.dotProduct(l));//dot product of normal off geometry and l
+                double nv = alignZero(n.dotProduct(v));//dot product of normal off geometry and vector from camera to geometry
+
+                if (nl * nv > 0) {
+                    double ktr = transparency(lightSource, l, n, coloredPoint);//get transparency level of geometry
+
+                    if (ktr * k > MIN_CALC_COLOR_K) {//if the transparency level is not below saved minimum
+                        //calculation of color according to phong reflectance model (with diffusive and specular...)
+                        Color ip = lightSource.getIntensity(coloredPoint.getPoint()).scale(ktr);
+                        result = result.add(
+                                calcDiffusive(kd, nl, ip), //add the diffuse
+                                calcSpecular(ks, l, n, nl, v, nShininess, ip));  //add the specular
+                    }
+                }
+            }
+        }
+
+        if (level == 1)//end of recursion
+            return Color.BLACK;
+        double kr = material.getkR(), kkr = k * kr;
+        if (kkr > MIN_CALC_COLOR_K){//if the reflectance level is not below saved minimum
+            Ray reflectedRay = constructReflectedRay(coloredPoint._point, inRay, n);//reflectance ray
+            Intersectable.GeoPoint reflectedPoint = findClosestIntersection(reflectedRay);//closest intersection point of reflection ray with geometries to the geometry
+            if (reflectedPoint != null)
+                result = result.add(calcColor(reflectedPoint, reflectedRay, level - 1, kkr).scale(kr));//recursion
+        }
+        double kt = material.getkT(), kkt = k * kt;
+        if (kkt > MIN_CALC_COLOR_K) {//if the transparency level is not below saved minimum
+            Ray refractedRay = constructRefractedRay(coloredPoint._point, inRay, n);//refraction ray
+            Intersectable.GeoPoint refractedPoint = findClosestIntersection(refractedRay);//closest intersection point of refraction ray with geometries to the geometry
+            if (refractedPoint != null)
+                result = result.add(calcColor(refractedPoint, refractedRay,
+                        level - 1, kkt).scale(kt));//recursion
+        }
+        return result;
+
+    }
+
+    /**
+     * calls the recursive calcColor function
+     * @param inRay ray
+     * @return color of point
+     */
+    private Color calcColor(Ray inRay) {
+        Intersectable.GeoPoint closestPoint = findClosestIntersection(inRay); //the closest intersection with the geometries point
+        if (closestPoint == null){ //If the Ray is not cut with any geometry the pixel will get the background color of the scene
+            return _scene.getBackground();
+        }
+        Color color = calcColor(closestPoint, inRay, MAX_CALC_COLOR_LEVEL, 1.0);//Calculate recursive color in pixels
+        color = color.add(_scene.getAmbientLight().getIntensity());//add ambient light
+        return color;
+    }
+
+
+    /**
+     * the function call to the adaptiveSuperSampling recursion function
+     *@param camera camera in scene
+     * @param distance distance of screen from camera
+     * @param nx number of pixels on X axis
+     * @param ny number of pixels on Y axis
+     * @param width screen width
+     * @param height screen height
+     * @param col the pixel position
+     * @param row the pixel position
+     * @return color of pixel
+     */
+    private  Color adaptiveSuperSampling(Camera camera, double distance, int nx, int ny, double width, double height, int col, int row) {
+        List<Ray> rays = camera.constructRaysThroughPixel(nx, ny, col, row, distance, width, height, NUM_OF_SAMPLE_RAYS); // calculate the rays throw the pixel
+        int ray1Index = (NUM_OF_SAMPLE_RAYS-1)*NUM_OF_SAMPLE_RAYS+(NUM_OF_SAMPLE_RAYS-1); //the index of the up and right ray
+        int ray2Index =(NUM_OF_SAMPLE_RAYS-1)*NUM_OF_SAMPLE_RAYS;  //the index of the up and left ray
+        int ray3Index= 0;  //the index of the button and left ray
+        int ray4Index = (NUM_OF_SAMPLE_RAYS-1);  // the index of the button and right ray
+
+        Color color = adaptiveSuperSampling(rays, LEVEL_OF_ADAPTIVE, ray1Index, ray2Index, ray3Index, ray4Index); //calculate the color for the pixel
+        return color;
+    }
+
+
+    /**
+     * Calculates the color of a pixel recursively using adaptive supersampling
+     * @param rays rays through pixel
+     * @param level_of_adaptive the level of the recursion
+     * @param ray1Index ray through corner 1
+     * @param ray2Index ray through corner 2
+     * @param ray3Index ray through corner 3
+     * @param ray4Index ray through corner 4
+     * @return Color
+     */
+    private Color adaptiveSuperSampling(List<Ray> rays, int level_of_adaptive,int ray1Index, int ray2Index, int ray3Index, int ray4Index) {
+        int numOfAdaptiveRays = 5;
+
+        Ray centerRay = rays.get(rays.size()-1); //get the center screen ray
+        Color centerColor=calcColor(centerRay); //get the color of the center
+        Ray ray1 = rays.get(ray1Index);  //get the up and right screen ray
+        Color color1=calcColor(ray1); //get the color of the up and right
+        Ray ray2 = rays.get(ray2Index); //get the up and left ray
+        Color color2=calcColor(ray2);//get the color of the up and left
+        Ray ray3 = rays.get(ray3Index);//get the button and left ray
+        Color color3=calcColor(ray3);//get the color of the button and left
+        Ray ray4 = rays.get(ray4Index);//get the button and right ray
+        Color color4=calcColor(ray4);//get the color of the button and right
+        if (level_of_adaptive == 0)
+        {
+            //Calculate the average color of the corners and the center
+            centerColor = centerColor.add(color1,color2, color3,color4);
+            return centerColor.reduce(numOfAdaptiveRays);
+        }
+        //If the corner color is the same as the center color, returns the center color
+        if (color1.isColorsEqual(centerColor) && color2.isColorsEqual(centerColor) && color3.isColorsEqual(centerColor) && color4.isColorsEqual(centerColor))
+        {
+            return centerColor;
+        }
+        //Otherwise, for each color that is different from the center, the recursion goes down to the depth of the pixel and sums up
+        // the colors until it gets the same color as the center color,
+        else {
+            if (!color1.isColorsEqual(centerColor)) {
+                color1 = color1.add(adaptiveSuperSampling(rays, level_of_adaptive - 1,ray1Index - (NUM_OF_SAMPLE_RAYS+1), ray2Index, ray3Index, ray4Index ));
+                color1 = color1.reduce(2);
+            }
+            if (!color2.isColorsEqual(centerColor)) {;
+                color2 = color2.add(adaptiveSuperSampling(rays,level_of_adaptive - 1,ray1Index, ray2Index-(NUM_OF_SAMPLE_RAYS-1), ray3Index, ray4Index));
+                color2 = color2.reduce(2);
+            }
+            if (!color3.isColorsEqual(centerColor)) {
+                color3 = color3.add(adaptiveSuperSampling(rays, level_of_adaptive - 1,ray1Index, ray2Index, ray3Index+(NUM_OF_SAMPLE_RAYS+1), ray4Index));
+                color3 = color3.reduce(2);
+            }
+            if (!color4.isColorsEqual(centerColor)) {
+                color4 = color4.add(adaptiveSuperSampling(rays, level_of_adaptive - 1,ray1Index, ray2Index, ray3Index, ray4Index+(NUM_OF_SAMPLE_RAYS-1)));
+                color4 = color4.reduce(2);
+            }
+            //Calculate and return the average color
+            centerColor = centerColor.add(color1, color2, color3, color4);
+            return centerColor.reduce(numOfAdaptiveRays);
+
+        }
+    }
+
+
+    /**
+     *   Find intersections of a ray with the scene geometries and get the
+     *       intersection point that is closest to the ray head. If there are no
+     *       intersections, null will be returned.
+     *
+     * @param ray the ray
+     * @return null if there were no intersections, otherwise closest point
+     */
+    private Intersectable.GeoPoint findClosestIntersection(Ray ray) {
+
+        if (ray == null) {
+            return null;
+        }
+        List<Intersectable.GeoPoint> intersections = _scene.getGeometries().findGeoIntersections(ray);
+        if (intersections == null)//there are no intersection points
+            return null;
+        Intersectable.GeoPoint closestPoint = getClosestPoint(intersections);//get closest point
+        return closestPoint;
+    }
+
+    /**
+     * construct a refracted ray
+     * @param pointGeo GeoPoint- the point on the geometry where color is calculated
+     * @param inRay ray
+     * @param n normal
+     * @return refracted ray
+     */
+    private Ray constructRefractedRay(Point3D pointGeo, Ray inRay, Vector n) {
+        return new Ray(pointGeo, inRay.getDir(), n);//creates new ray that is scaled by delta- it is moved a little from surface of geometry
+    }
+
+    /**
+     * construct a reflected ray
+     * @param pointGeo GeoPoint- the point on the geometry where color is calculated
+     * @param inRay ray
+     * @param n normal
+     * @return reflected ray
+     */
+    private Ray constructReflectedRay(Point3D pointGeo, Ray inRay, Vector n) {
+        Vector v = inRay.getDir();
+        double vn = v.dotProduct(n);
+
+        if (vn == 0) { //Perpendicular vectors
+            return null;
+        }
+
+        Vector r = v.subtract(n.scale(2 * vn));
+        return new Ray(pointGeo, r, n);
+    }
+
+
+    /**
+     * Calculate Specular component of light reflection.
+     *
+     * @param ks         specular component coef
+     * @param l          direction from light to point
+     * @param n          normal to surface at the point
+     * @param nl         dot-product n*l
+     * @param v          direction from point of view to point
+     * @param nShininess shininess level
+     * @param ip         light intensity at the point
+     * @return specular component light effect at the point
+     * Finally, the Phong model has a provision for a highlight, or specular, component, which reflects light in a
+     * shiny way. This is defined by [rs,gs,bs](-V.R)^p, where R is the mirror reflection direction vector we discussed
+     * in class (and also used for ray tracing), and where p is a specular power. The higher the value of p, the shinier
+     * the surface.
+     */
+    private Color calcSpecular(double ks, Vector l, Vector n, double nl, Vector v, int nShininess, Color ip) {
+        double p = nShininess;
+
+        Vector R = l.add(n.scale(-2 * nl)); // nl must not be zero!
+        double minusVR = -alignZero(R.dotProduct(v));
+        if (minusVR <= 0) {
+            return Color.BLACK; // view from direction opposite to r vector
+        }
+        // [rs,gs,bs](-V.R)^p
+        return ip.scale(ks * Math.pow(minusVR, p));
+    }
+
+    /**
+     * Calculate Diffusive component of light reflection.
+     *
+     * @param kd diffusive component coef
+     * @param nl dot-product n*l
+     * @param ip light intensity at the point
+     * @return diffusive component of light reflection
+     * @author Dan Zilberstein
+     * The diffuse component is that dot product nâ€¢L that we discussed in class. It approximates light, originally
+     * from light source L, reflecting from a surface which is diffuse, or non-glossy. One example of a non-glossy
+     * surface is paper. In general, you'll also want this to have a non-gray color value,
+     * so this term would in general be a color defined as: [rd,gd,bd](nâ€¢L)
+     */
+    private Color calcDiffusive(double kd, double nl, Color ip) {
+        if (nl < 0) {
+            nl = -nl;
+        }
+
+        return ip.scale(nl * kd);
+    }
+    /**
+     * @param val value
+     * @return sign of value
+     */
+    private boolean sign(double val) {
+        return (val > 0d);
+    }
+
+    /**
+     * print message
+     * @param msg message to print
+     */
+    private synchronized void printMessage(String msg) {
+        synchronized (System.out) {
+            System.out.println(msg);
+        }
+    }
+
+    /**
+         * Pixel is an internal helper class whose objects are associated with a Render
+         * object that they are generated in scope of. It is used for multithreading in
+         * the Renderer and for follow up its progress.<br/>
+         * There is a main follow up object and several secondary objects - one in each
+         * thread.
+         *
+         * @author Dan
+         *
+         */
+        private class Pixel {
+            private long maxRows = 0;
+            private long maxCols = 0;
+            private long pixels = 0;
+            public volatile int row = 0;
+            public volatile int col = -1;
+            private long counter = 0;
+            private int percents = 0;
+            private long nextCounter = 0;
+
+            /**
+             * The constructor for initializing the main follow up Pixel object
+             *
+             * @param maxRows the amount of pixel rows
+             * @param maxCols the amount of pixel columns
+             */
+            public Pixel(int maxRows, int maxCols) {
+                this.maxRows = maxRows;
+                this.maxCols = maxCols;
+                this.pixels = (long) maxRows * maxCols;
+                this.nextCounter = this.pixels / 100;
+                if (Render.this._print)
+                    System.out.printf("\r %02d%%", this.percents);
+            }
+
+            /**
+             * Default constructor for secondary Pixel objects
+             */
+            public Pixel() {
+            }
+
+            /**
+             * Internal function for thread-safe manipulating of main follow up Pixel object
+             * - this function is critical section for all the threads, and main Pixel
+             * object data is the shared data of this critical section.<br/>
+             * The function provides next pixel number each call.
+             *
+             * @param target target secondary Pixel object to copy the row/column of the
+             *               next pixel
+             * @return the progress percentage for follow up: if it is 0 - nothing to print,
+             *         if it is -1 - the task is finished, any other value - the progress
+             *         percentage (only when it changes)
+             */
+            private synchronized int nextP(Pixel target) {
+                ++col;
+                ++this.counter;
+                if (col < this.maxCols) {
+                    target.row = this.row;
+                    target.col = this.col;
+                    if (Render.this._print && this.counter == this.nextCounter) {
+                        ++this.percents;
+                        this.nextCounter = this.pixels * (this.percents + 1) / 100;
+                        return this.percents;
+                    }
+                    return 0;
+                }
+                ++row;
+                if (row < this.maxRows) {
+                    col = 0;
+                    target.row = this.row;
+                    target.col = this.col;
+                    if (Render.this._print && this.counter == this.nextCounter) {
+                        ++this.percents;
+                        this.nextCounter = this.pixels * (this.percents + 1) / 100;
+                        return this.percents;
+                    }
+                    return 0;
+                }
+                return -1;
+            }
+
+            /**
+             * Public function for getting next pixel number into secondary Pixel object.
+             * The function prints also progress percentage in the console window.
+             *
+             * @param target target secondary Pixel object to copy the row/column of the
+             *               next pixel
+             * @return true if the work still in progress, -1 if it's done
+             */
+            public boolean nextPixel(Pixel target) {
+                int percent = nextP(target);
+                if (Render.this._print && percent > 0)
+                    synchronized (this) {
+                        notifyAll();
+                    }
+                if (percent >= 0)
+                    return true;
+                if (Render.this._print)
+                    synchronized (this) {
+                        notifyAll();
+                    }
+                return false;
+            }
+
+            /**
+             * Debug print of progress percentage - must be run from the main thread
+             *
+            public void print() {
+                if (Render.this.print)
+                    while (this.percents < 100)
+                        try {
+                            synchronized (this) {
+                                wait();
+                            }
+                            System.out.printf("\r %02d%%", this.percents);
+                            System.out.flush();
+                        } catch (Exception e) {
+                        }
+            }
+        }
+
+        /**
+         * Camera setter
+         *
+         * @param camera to set
+         * @return renderer itself - for chaining
+         *
+        public Render setCamera(Camera camera) {
+            this.camera = camera;
+            return this;
+        }
+
+        /**
+         * Image writer setter
+         *
+         * @param imgWriter the image writer to set
+         * @return renderer itself - for chaining
+         *
+        public Render setImageWriter(ImageWriter imgWriter) {
+            this.imageWriter = imgWriter;
+            return this;
+        }
+
+        /**
+         * Ray tracer setter
+         *
+         * @param tracer to use
+         * @return renderer itself - for chaining
+         *
+        public Render setRayTracer(RayTracerBase tracer) {
+            this.tracer = tracer;
+            return this;
+        }
+
+
+
+        /**
+         * Cast ray from camera in order to color a pixel
+         * @param nX resolution on X axis (number of pixels in row)
+         * @param nY resolution on Y axis (number of pixels in column)
+         * @param col pixel's column number (pixel index in row)
+         * @param row pixel's row number (pixel index in column)
+         *
+        private void castRay(int nX, int nY, int col, int row) {
+            Ray ray = camera.constructRayThroughPixel(nX, nY, col, row);
+            Color color = tracer.traceRay(ray);
+            imageWriter.writePixel(col, row, color);
+        }
+
+        /**
+         * This function renders image's pixel color map from the scene included with
+         * the Renderer object - with multi-threading
+         *
+        private void renderImageThreaded() {
+            final int nX = imageWriter.getNx();
+            final int nY = imageWriter.getNy();
+            final Pixel thePixel = new Pixel(nY, nX);
+            // Generate threads
+            Thread[] threads = new Thread[threadsCount];
+            for (int i = threadsCount - 1; i >= 0; --i) {
+                threads[i] = new Thread(() -> {
+                    Pixel pixel = new Pixel();
+                    while (thePixel.nextPixel(pixel))
+                        castRay(nX, nY, pixel.col, pixel.row);
+                });
+            }
+            // Start threads
+            for (Thread thread : threads)
+                thread.start();
+
+            // Print percents on the console
+            thePixel.print();
+
+            // Ensure all threads have finished
+            for (Thread thread : threads)
+                try {
+                    thread.join();
+                } catch (Exception e) {
+                }
+
+            if (print)
+                System.out.print("\r100%");
+        }*/
     }
 }
