@@ -38,7 +38,11 @@ public class Point3D {
         _y = new Coordinate(y);
         _z = new Coordinate(z);
     }
-
+    public Point3D(Point3D p) {
+        this._x = p._x;
+        this._y =p._y;
+        this._z =p._z;
+    }
     /**
      * Get the x coordinate
      *

@@ -61,7 +61,12 @@ public class Plane extends Geometry {
      */
     @Override
     public Vector getNormal(Point3D point) {
-        return null; // NOT IMPLEMENTED
+        Vector v1 = point.subtract(_p0);
+        Vector v2 = v1.crossProduct(_normal);
+        Vector v3 = v1.subtract(v2);
+
+        return v3.crossProduct(v1).normalize();
+
     }
 
     /**

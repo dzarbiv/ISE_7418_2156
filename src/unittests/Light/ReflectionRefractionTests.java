@@ -42,7 +42,9 @@ public class ReflectionRefractionTests {
         Render render = new Render(scene,camera) //
                 .setImageWriter(new ImageWriter("refractionTwoSpheres", 500, 500)) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene))
+                .setMultithreading(0).setDebugPrint();
+
         render.renderImage();
         render.writeToImage();
     }
@@ -80,7 +82,9 @@ public class ReflectionRefractionTests {
         Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene))
+                .setMultithreading(0).setDebugPrint();
+
 
         render.renderImage();
         render.writeToImage();
@@ -113,7 +117,9 @@ public class ReflectionRefractionTests {
         Render render = new Render(scene, camera) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene))
+                .setMultithreading(0).setDebugPrint();
+
 
         render.renderImage();
         render.writeToImage();
@@ -152,10 +158,11 @@ public class ReflectionRefractionTests {
                 .setKl(0.00000000001).setKq(0.0000000001));
 
         ImageWriter imageWriter = new ImageWriter("reflectionRefractionFiveObjectsTest", 600, 600);
-        Render render = new Render(scene, camera) //
+        Render render = new Render(scene, camera,imageWriter, true, false) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene))
+                .setMultithreading(0).setDebugPrint();
 
         render.renderImage();
         render.writeToImage();

@@ -24,10 +24,10 @@ public class myImage {
 
     //front view-point
     private Camera camera = new Camera(new Point3D(1000, 0,0 ), new Vector(0, 0, 1), new Vector(-1, 0, 0)) //
-           .setViewPlaneSize(400, 400).setDistance(1000);
+            .setViewPlaneSize(400, 400).setDistance(1000);
     //side view-point
-	//private Camera camera = new Camera(new Point3D(0, 0,1000 ), new Vector(1, 0, 0), new Vector(0, 0, -1)) //
-	//		.setViewPlaneSize(200, 200).setDistance(1000);
+    //private Camera camera = new Camera(new Point3D(0, 0,1000 ), new Vector(1, 0, 0), new Vector(0, 0, -1)) //
+    //		.setViewPlaneSize(200, 200).setDistance(1000);
 
 
     //Light blue: 51-153-255
@@ -113,10 +113,10 @@ public class myImage {
                             .setEmission(new Color(black))
                             .setMaterial(new Material().setKd(0.5).setKs(0.2).setNShininess(30)),
 
-                     //right hand
-                     new Triangle(new Point3D(50, 36, -60), new Point3D(50, 42, -20), new Point3D(50, 79, -68))
-                             .setEmission(new Color(Gold))
-                             .setMaterial(new Material().setKd(0.5).setKs(0.5).setNShininess(30)),
+                    //right hand
+                    new Triangle(new Point3D(50, 36, -60), new Point3D(50, 42, -20), new Point3D(50, 79, -68))
+                            .setEmission(new Color(Gold))
+                            .setMaterial(new Material().setKd(0.5).setKs(0.5).setNShininess(30)),
                     //right hand scope
                     new Triangle(new Point3D(49, 34, -62), new Point3D(49, 41, -15), new Point3D(49, 83, -70.5))
                             .setEmission(new Color(black))
@@ -138,9 +138,9 @@ public class myImage {
                             .setEmission(new Color(black))
                             .setMaterial(new Material().setKd(0.5).setKs(0.5).setNShininess(30)),
                     //left leg
-                     new Triangle(new Point3D(50, -10, -136), new Point3D(50, -25, -110), new Point3D(50, -53, -150))
-                          .setEmission(new Color(red))
-                          .setMaterial(new Material().setKd(0.5).setKs(0.5).setNShininess(30)),
+                    new Triangle(new Point3D(50, -10, -136), new Point3D(50, -25, -110), new Point3D(50, -53, -150))
+                            .setEmission(new Color(red))
+                            .setMaterial(new Material().setKd(0.5).setKs(0.5).setNShininess(30)),
                     //left leg scope
                     new Triangle(new Point3D(49, -7.5, -137), new Point3D(49, -24, -106), new Point3D(49, -56, -153))
                             .setEmission(new Color(black))
@@ -150,14 +150,14 @@ public class myImage {
         } catch (Exception e) {
 
         }
-      // scene._lightSourceList.add( //
-      //         new SpotLight(new Color(WHITE), new Point3D(40, 80, 115), new Vector(-1, -1, -4))
-      //                 .setKl(4E-4).setKq(2E-5));
-      // scene._lightSourceList.add(new PointLight(new Color(160,80,240), new Point3D(-100, -100, 100))//
-      //         .setKl(0.00000000001).setKq(0.0000000001));
-      // scene._lightSourceList.add( //
-      //         new SpotLight(new Color(400, 240, 0), new Point3D(-100, -100, 200), new Vector(1, 1, -3)) //
-      //                 .setKl(1E-5).setKq(1.5E-7));
+        // scene._lightSourceList.add( //
+        //         new SpotLight(new Color(WHITE), new Point3D(40, 80, 115), new Vector(-1, -1, -4))
+        //                 .setKl(4E-4).setKq(2E-5));
+        // scene._lightSourceList.add(new PointLight(new Color(160,80,240), new Point3D(-100, -100, 100))//
+        //         .setKl(0.00000000001).setKq(0.0000000001));
+        // scene._lightSourceList.add( //
+        //         new SpotLight(new Color(400, 240, 0), new Point3D(-100, -100, 200), new Vector(1, 1, -3)) //
+        //                 .setKl(1E-5).setKq(1.5E-7));
         scene._lightSourceList.add( //
                 new SpotLight(new Color(700, 400, 400), new Point3D(100, 0, 150), new Vector(-1, -1, -4)) //
                         .setKl(4E-4).setKq(2E-5));
@@ -166,7 +166,8 @@ public class myImage {
         Render render = new Render(scene,camera,imageWriter) //
                 .setImageWriter(imageWriter) //
                 .setCamera(camera) //
-                .setRayTracer(new RayTracerBasic(scene));
+                .setRayTracer(new RayTracerBasic(scene))
+                .setMultithreading(6).setDebugPrint();
         render.renderImage();
         render.writeToImage();
     }

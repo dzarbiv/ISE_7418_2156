@@ -1,14 +1,28 @@
-/**package unittests.renderer;
+package unittests.renderer;
+
+import elements.Camera;
+import elements.PointLight;
+import geometries.Triangle;
+import org.junit.jupiter.api.Test;
+import primitives.Color;
+import primitives.Material;
+import primitives.Point3D;
+import primitives.Vector;
+import renderer.ImageWriter;
+import renderer.RayTracerBasic;
+import renderer.Render;
+import scene.Scene;
 
 /**
  * Test rendering an image
  *
  * @author Dan
- *
+ */
 public class TeapotTest {
-    private final Camera camera = new Camera(new Point3D(0, 0, -1000),  new Vector(0, 1, 0),new Vector(0, 0, 1)) //
-            .setDistance(1000).setViewPlaneSize(200, 200);
-    private final Scene scene = new Scene("Test scene");
+    private final Camera camera = new Camera(new Point3D(0, 0, -1000),  new Vector(0, 1, 0),new Vector(0, 0, 1))//
+           .setDistance(1000).setViewPlaneSize(200, 200);
+    private final Scene scene = new Scene("Test scene")
+                   .setCamera(camera).setDistance(1000);
 
     private static final Color color = new Color(200, 0, 0);
     private static final Material mat = new Material().setKd(0.5).setKs(0.5).setNShininess(60);
@@ -548,8 +562,9 @@ public class TeapotTest {
 
     /**
      * Produce a scene with a 3D model and render it into a png image
-     *
-    @Test
+     */
+
+@Test
     public void teapot1() {
         scene._geometries.add( //
                 new Triangle(pnts[7], pnts[6], pnts[1]).setEmission(color).setMaterial(mat), //
@@ -1549,14 +1564,15 @@ public class TeapotTest {
                 .setKq(0.000001));
 
         ImageWriter imageWriter = new ImageWriter("teapot", 800, 800);
-        Render render = new Render() //
+        Render render = new Render(scene,camera) //
                 .setCamera(camera) //
                 .setImageWriter(imageWriter) //
                 .setRayTracer(new RayTracerBasic(scene)) //
-                .setMultithreading(6).setDebugPrint();
+                .setMultithreading(0).setDebugPrint()
+                .setSuperSampling(true).setAdaptiveSuperSampling(true);
         render.renderImage();
         render.printGrid(50, new Color(java.awt.Color.YELLOW));
         render.writeToImage();
     }
 
-}*/
+}

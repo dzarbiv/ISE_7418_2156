@@ -68,8 +68,13 @@ public class Camera {
      * @return return the camera itself (Camera)
      */
     public Camera setDistance(double distance) {
-        _distance = distance;
+        //The distance between the screen and the camera cannot be 0
+        if (isZero(distance))
+        {
+            throw new IllegalArgumentException("distance cannot be 0");
+        }
 
+        _distance = distance;
         // return this for chaining
         return this;
     }
@@ -81,19 +86,13 @@ public class Camera {
      * @param nY number of pixels in Y axis
      * @param j j coordinate of pixel
      * @param i i coordinate of pixel
-     * @param distance distance of screen from camera
      * @param width screen width
      * @param height screen height
      * @return ray through receives pixel
      */
-    public Ray constructRayThroughPixel(int nX, int nY, int j, int i, double width, double height, double distance) {
+    public Ray constructRayThroughPixel(int nX, int nY, int j, int i, double width, double height) {
 
-        //The distance between the screen and the camera cannot be 0
-        if (isZero(distance))
-        {
-            throw new IllegalArgumentException("distance cannot be 0");
-        }
-        Point3D Pc =  _p0.add(_vTo.scale(distance)); //the center of the screen point
+        Point3D Pc =  _p0.add(_vTo.scale(_distance)); //the center of the screen point
         double Ry = height/nY; //The number of pixels on the y axis
         double Rx = width/nX;  //The number of pixels on the x axis
         double yi =  ((i - nY/2d)*Ry + Ry/2d); //The midpoint of the pixel on the y axis
@@ -122,20 +121,15 @@ public class Camera {
      * @param nY number of pixels in Y axis
      * @param j j coordinate of pixel
      * @param i i coordinate of pixel
-     * @param distance distance of screen from camera
      * @param width screen width
      * @param height screen height
      * @param num_of_sample_rays number of sample rays required
      * @return beam of rays through receives pixel
      */
-    public List<Ray> constructRaysThroughPixel(int nX, int nY, int j, int i, double distance,
+    public List<Ray> constructRaysThroughPixel(int nX, int nY, int j, int i,
                                                double width, double height, int num_of_sample_rays)
     {
-        //The distance between the screen and the camera cannot be 0
-        if (isZero(distance))
-        {
-            throw new IllegalArgumentException("distance cannot be 0");
-        }
+
 
         List<Ray> sample_rays = new ArrayList<>();
 
@@ -146,12 +140,12 @@ public class Camera {
         double pixel_Ry = Ry/num_of_sample_rays; //The height of each grid block we divided the parcel into
         double pixel_Rx = Rx/num_of_sample_rays; //The width of each grid block we divided the parcel into
 
-        for (int row = 0; row < num_of_sample_rays; ++row) {//foreach place in the pixel grid
-            for (int column = 0; column < num_of_sample_rays; ++column) {
-                sample_rays.add(constructRaysThroughPixel(pixel_Ry,pixel_Rx,yi, xj, row, column,distance));//add the ray
+        for (int row = 0; row < num_of_sample_rays; row++) {//foreach place in the pixel grid
+            for (int column = 0; column < num_of_sample_rays; column++) {
+                sample_rays.add(constructRaysThroughPixel(pixel_Ry,pixel_Rx,yi, xj, column, row));//add the ray
             }
         }
-        sample_rays.add(constructRayThroughPixel(nX, nY, j, i, distance, width, height));//add the center screen ray
+        sample_rays.add(constructRayThroughPixel(nX, nY, j, i, width, height));//add the center screen ray
         return sample_rays;
     }
 
@@ -164,13 +158,11 @@ public class Camera {
      * @param xj distance of original pixel from (0,0) on X axis
      * @param j j coordinate of small "pixel"
      * @param i i coordinate of small "pixel"
-     * @param distance distance of screen from camera
-
      * @return beam of rays through pixel
      */
-    private Ray constructRaysThroughPixel(double Ry,double Rx, double yi, double xj, int j, int i, double distance)
+    private Ray constructRaysThroughPixel(double Ry,double Rx, double yi, double xj, int j, int i)
     {
-        Point3D Pc = _p0.add(_vTo.scale(distance)); //the center of the screen point
+        Point3D Pc = _p0.add(_vTo.scale(_distance)); //the center of the screen point
 
         double y_sample_i =  (i *Ry + Ry/2d); //The pixel starting point on the y axis
         double x_sample_j=   (j *Rx + Rx/2d); //The pixel starting point on the x axis
@@ -191,7 +183,7 @@ public class Camera {
     }
 
 
-        public Point3D getP0() {
+    public Point3D getP0() {
         return _p0;
     }
 
